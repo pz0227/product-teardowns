@@ -60,11 +60,26 @@ An application counts toward TQA only if **all four** hold:
 
 Interviews per 100 TQAs · recruiter response rate · offer rate · retention / Turbo renewal. These are the real results — but they lag by weeks and are confounded by market conditions, candidate background, and hiring cycles. They validate the north star; they can't steer weekly product decisions.
 
-_TODO (Polly): operationalization — how to measure "factually correct" and "interview-ready" at scale? Candidate proxies: % of critical fields sourced from canonical profile vs. generated (system-measurable); % of resume diffs explicitly confirmed by user; post-submission error reports per 100 applications._
+### Making TQA measurable at scale
 
-## 5. Diagnosis — six failure modes
+"Factually correct" and "interview-ready" cannot stay vague qualitative ideas. Each of the four conditions has observable system proxies:
 
-The six problems I logged are really four product failures wearing six costumes:
+1. **Qualified** — *hard-constraint pass rate*: the role passes the user's saved constraints (location, work authorization, salary floor, seniority, job type, sponsorship).
+2. **Factually grounded** —
+   - *Critical-field provenance coverage*: % of critical fields populated from the canonical profile or explicit user rules, vs. model-generated.
+   - *Critical-field correction rate*: % of submissions where the user manually corrects a high-risk field.
+   - *Salary conflict rate*: % of applications where the entered pay expectation conflicts with the JD's stated range or compensation unit.
+3. **Successfully submitted** — *verified submission completion rate*: ATS confirmation or a verified success state — not "scan finished."
+4. **Interview-ready** —
+   - *Application-to-resume-version linkage rate*: the exact submitted resume version is permanently attached to the application.
+   - *Material resume-diff acknowledgment rate*: % of material changes confirmed by the user or covered by a saved approval rule.
+   - *High-impact answer provenance rate*: % of generated answers linked to specific user experiences, projects, or evidence-bank entries.
+
+I would not claim these proxies perfectly measure trust. I would say they make trust operational enough to improve systematically.
+
+## 5. Diagnosis — six failure modes, four system gaps
+
+The six failure modes I logged are concrete and memorable on their own — but they point to four underlying system-level product gaps:
 
 | # | Observed problem | Failure mode |
 |---|---|---|
@@ -75,9 +90,24 @@ The six problems I logged are really four product failures wearing six costumes:
 | 5 | Agent silently rewrites resume; user can't explain it in interviews | **Change traceability / interview-readiness failure** |
 | 6 | LinkedIn Easy Apply jobs included without the tailored resume | **Channel coverage / asset handoff failure** |
 
+### The four underlying system gaps
+
+| System gap | Covers | What the product needs |
+|---|---|---|
+| **1 · Canonical profile & policy engine** | #1 wrong facts, #2 salary misuse | A canonical source of truth plus explicit user policies for high-risk fields |
+| **2 · Cross-site execution & asset routing** | #3 AI-scan failures, #6 Easy Apply handoff | Reliable fallback states, clear execution visibility, channel-aware resume handoff |
+| **3 · Evidence-grounded content generation** | #4 AIGC-sounding answers | An evidence bank, user voice controls, generation tied to real experiences |
+| **4 · Resume versioning & change traceability** | #5 unexplainable rewrites | Per-application resume history, visible diffs with reasons, an interview-prep view |
+
 **Root cause:** every one of these is *cheap* under an "Applications Sent" north star — the application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
 
-_TODO (Polly): steelman the builder — why would a rational growth-stage team ship this? (Speed is demo-visible, verification is invisible; apps-sent is the value users feel on day one; competitors race on volume.) Then: where exactly is the tradeoff wrong?_
+### Steelman: why a rational team ships this
+
+I think Jobright's current tradeoff is understandable. If I were on the team at an early growth stage, I might also prioritize application volume first. "Applications sent" is immediate, visible, easy for users to understand, and directly tied to the Turbo promise of saving time. It is easy to instrument, easy to demonstrate in a demo, and aligned with a market where competitors compete on speed and automation. By contrast, trust, factual accuracy, and interview readiness are nearly invisible in the first-session experience — and adding confirmation steps for salary, referral status, resume edits, or free-text answers creates friction and hurts completion rates. From a growth perspective, optimizing for throughput first is a rational choice.
+
+**The mistake is not choosing "Applications Sent" as an early metric. The mistake is allowing it to remain the dominant optimization target once the product starts making high-stakes decisions on behalf of users.** Once Jobright fills in work authorization, referral status, salary expectations, education history, resume claims, or behavioral answers, the cost of an error is no longer linear: a single incorrect answer can create reputational risk, cost the user a role, or leave them unable to defend their submitted materials in an interview.
+
+So I would frame the product shift as: **keep optimizing for application speed, but move from maximizing raw applications sent to maximizing trusted qualified applications submitted.** The goal is not to add manual review everywhere. The goal is to automate low-risk tasks aggressively while escalating only high-risk or low-confidence decisions.
 
 ## 6. Recommendations (prioritized)
 
@@ -92,3 +122,7 @@ _TODO (Polly): steelman the builder — why would a rational growth-stage team s
 **P2 — Execution reliability.** For non-partnered ATS sites, classify before acting: full adapter / partial autofill / AI scan / unsupported. Show explicit status, expected steps, and a fallback. *"This site fills to ~60%; please confirm the rest"* beats an infinite loading state that ends with nothing.
 
 _TODO (Week 3): RICE scoring across these five + the tradeoffs I'd accept as their PM._
+
+## 7. One-line product thesis
+
+> Jobright's opportunity is not simply to help users apply faster. It is to become a job-search agent that users trust to represent them accurately when they are not watching.

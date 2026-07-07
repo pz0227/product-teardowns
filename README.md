@@ -8,7 +8,7 @@ Sorted alphabetically. Each folder contains the full teardown + a dated evidence
 
 | Product | Type | Industry | Status | One-line thesis |
 |---|---|---|---|---|
-| [Jobright.ai](./jobright-ai/teardown.md) | AI copilot · SaaS | Career & HR | 🚧 In progress | An AI job copilot optimized for "applications sent" — while its users are buying interviews. |
+| [Jobright.ai](./jobright-ai/teardown.md) | AI copilot · SaaS | Career & HR | 🚧 In progress | Optimized for "applications sent" — but the real prize is being the agent users trust to represent them when they're not watching. |
 
 ## Why I do this
 
