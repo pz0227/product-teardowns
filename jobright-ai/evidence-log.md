@@ -2,15 +2,22 @@
 
 > Rule: dated, specific, reproducible. One entry per observation. Numbers anonymized where personal.
 
-## Week 2 plan: from n=1 to a 30–50 application sample
+## Week 2 plan: separate recommendation quality from execution quality
 
-Current entries are strong directional observations from one heavy user — enough for a product hypothesis, not for prevalence claims. Week 2: log a structured sample across 30–50 applications.
+Current entries are strong directional hypotheses from one heavy user, not population-level claims. Evidence collection splits into **two funnels**:
 
-**Per application, record:** date · company & role · platform/ATS · method (partnered ATS / AI Scan / LinkedIn Easy Apply / other) · time to complete · autofill succeeded? · any critical field incorrect? · salary wrong, stale, or wrong unit? · generated answer required major rewriting? · resume changes understandable & interview-defensible? · correct tailored resume available for the channel? · submission verified? · screenshot or short note for major failures.
+### Funnel 1 — Recommendation-stage evidence
+Measures whether Jobright recommends the right jobs. Primary metric: **constraint violation rate in the recommendation feed**. The existing 43% observation belongs here — it is evidence about recommendation precision / constraint mismatch, *not* application execution quality.
 
-**Derivable estimates:** critical-field error rate · AI-scan completion rate + median/p90 completion time · salary-context error rate · generated-content rewrite rate · resume-change traceability rate · tailored-resume availability rate by channel · verified submission completion rate.
+### Funnel 2 — Application-stage evidence
+Measures whether Jobright reliably executes applications once a job is selected. To keep the study sustainable, do **not** fully log every application. Two-layer system:
 
-**Positioning:** these are not population-level claims. They are a structured usability sample designed to identify where delegated job-search automation breaks trust.
+- **Event-triggered logging:** always record any critical incident — wrong referral answer, incorrect school, salary-unit mismatch, visa/work-authorization error, failed AI Scan, missing tailored resume.
+- **Random audit sampling:** each day, fully audit a random sample of **5 applications** with the complete schema: company & role · platform/ATS · method (partnered ATS / AI Scan / Easy Apply / other) · time to complete · autofill succeeded? · critical field wrong? · salary stale/incorrect/wrong unit? · generated content needed major rewriting? · resume changes understandable & interview-defensible? · correct tailored resume available? · submission verified?
+
+This yields an unbiased execution-quality sample without full logging of 30+ daily applications, while still capturing all low-frequency, high-severity incidents.
+
+**Positioning:** these are not population-level claims yet. They are a structured usability sample designed to identify where delegated job-search automation breaks trust.
 
 ## 2026-07-07 — Recommendation precision sample #1
 Sampled the top 7 recommendations in my feed (profile: entry-level PM/analyst, full-time, US):

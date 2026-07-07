@@ -62,20 +62,29 @@ Interviews per 100 TQAs · recruiter response rate · offer rate · retention / 
 
 ### Making TQA measurable at scale
 
-"Factually correct" and "interview-ready" cannot stay vague qualitative ideas. Each of the four conditions has observable system proxies:
+"Trusted Qualified Applications" should be operationalized through observable system signals rather than treated as a vague quality concept.
 
-1. **Qualified** — *hard-constraint pass rate*: the role passes the user's saved constraints (location, work authorization, salary floor, seniority, job type, sponsorship).
-2. **Factually grounded** —
-   - *Critical-field provenance coverage*: % of critical fields populated from the canonical profile or explicit user rules, vs. model-generated.
-   - *Critical-field correction rate*: % of submissions where the user manually corrects a high-risk field.
-   - *Salary conflict rate*: % of applications where the entered pay expectation conflicts with the JD's stated range or compensation unit.
-3. **Successfully submitted** — *verified submission completion rate*: ATS confirmation or a verified success state — not "scan finished."
-4. **Interview-ready** —
-   - *Application-to-resume-version linkage rate*: the exact submitted resume version is permanently attached to the application.
-   - *Material resume-diff acknowledgment rate*: % of material changes confirmed by the user or covered by a saved approval rule.
-   - *High-impact answer provenance rate*: % of generated answers linked to specific user experiences, projects, or evidence-bank entries.
+**Qualified** — this should *not* be measured as "hard-constraint pass rate," because passing saved constraints is part of the definition itself. The key quality metrics measure failure instead, and belong to the **recommendation stage**:
+- *Constraint violation rate*: % of recommended or submitted roles that violate user-saved hard constraints (work authorization, location, salary floor, seniority, job type, sponsorship).
+- *Post-recommendation rejection rate*: % of recommended jobs the user dismisses because they violate a saved requirement.
 
-I would not claim these proxies perfectly measure trust. I would say they make trust operational enough to improve systematically.
+**Factually grounded** — critical fields (education, employment history, referral status, work authorization, salary expectations) come from a canonical profile, saved user policy, or explicit confirmation:
+- *Critical-field provenance coverage*: % of high-risk fields populated from a canonical profile, saved rule, or explicit confirmation.
+- *Critical-field correction rate*: % of high-risk autofilled fields later corrected by the user.
+- *Salary-context conflict rate*: % of applications where entered compensation conflicts with the job's stated range, compensation unit, or saved user rule.
+- *Low-confidence escalation rate*: % of uncertain high-risk fields surfaced to the user rather than auto-submitted.
+
+**Successfully submitted:**
+- *Verified submission completion rate*: % of application flows with a confirmed submission state.
+- *Unsupported-site completion rate*: completion rate for AI Scan / non-partnered ATS flows.
+- *p50 / p90 time to completion*: especially for unsupported sites, where long scan time is a major failure mode.
+
+**Interview-ready:**
+- *Application-to-resume-version linkage rate*: % of submitted applications linked to the exact resume version used.
+- *Material resume-diff acknowledgment rate*: % of high-impact resume edits reviewed or pre-approved by the user.
+- *High-impact answer provenance rate*: % of generated behavioral answers or cover-letter claims linked to a user-provided project, metric, or evidence-bank entry.
+
+These do not perfectly measure trust. But they make trust measurable enough to improve systematically.
 
 ## 5. Diagnosis — six failure modes, four system gaps
 
@@ -101,13 +110,21 @@ The six failure modes I logged are concrete and memorable on their own — but t
 
 **Root cause:** every one of these is *cheap* under an "Applications Sent" north star — the application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
 
-### Steelman: why a rational team ships this
+### Steelman: why "Applications Sent" can remain rational for longer than it should
 
-I think Jobright's current tradeoff is understandable. If I were on the team at an early growth stage, I might also prioritize application volume first. "Applications sent" is immediate, visible, easy for users to understand, and directly tied to the Turbo promise of saving time. It is easy to instrument, easy to demonstrate in a demo, and aligned with a market where competitors compete on speed and automation. By contrast, trust, factual accuracy, and interview readiness are nearly invisible in the first-session experience — and adding confirmation steps for salary, referral status, resume edits, or free-text answers creates friction and hurts completion rates. From a growth perspective, optimizing for throughput first is a rational choice.
+I think Jobright's current focus on applications sent is understandable.
 
-**The mistake is not choosing "Applications Sent" as an early metric. The mistake is allowing it to remain the dominant optimization target once the product starts making high-stakes decisions on behalf of users.** Once Jobright fills in work authorization, referral status, salary expectations, education history, resume claims, or behavioral answers, the cost of an error is no longer linear: a single incorrect answer can create reputational risk, cost the user a role, or leave them unable to defend their submitted materials in an interview.
+In an early growth stage, "applications sent" is immediate, visible, and easy for users to understand. It clearly communicates the Turbo value proposition: save time, reduce repetitive work, and apply to more relevant jobs. It is also easy to instrument, easy to demonstrate in a product demo, and aligned with a market where competing AI job tools are heavily competing on speed and automation.
 
-So I would frame the product shift as: **keep optimizing for application speed, but move from maximizing raw applications sent to maximizing trusted qualified applications submitted.** The goal is not to add manual review everywhere. The goal is to automate low-risk tasks aggressively while escalating only high-risk or low-confidence decisions.
+Trust, factual accuracy, and interview readiness are less visible in the first-session experience. Adding confirmation steps for salary, referral status, resume edits, or free-text answers can introduce friction and reduce short-term completion rates. If I were on the team, I might initially make the same tradeoff.
+
+**There is also an attribution problem.** Many trust failures do not surface at the moment of submission. A wrong salary expectation, referral answer, work-authorization response, or unfamiliar resume edit may create problems days or weeks later — during recruiter screening, interview preparation, or renewal decisions. The user may silently correct the information, blame themselves, blame the employer's application flow, or simply stop using the product later. As a result, Jobright's core dashboards may record a successful application while missing the downstream trust cost. The product can look healthy on immediate throughput metrics even when it is gradually weakening user confidence.
+
+So the issue is not that optimizing for applications sent was irrational. The issue is that the metric becomes incomplete once Jobright is representing users in high-stakes decisions.
+
+> Volume is primarily an acquisition logic. Trust is primarily a retention logic.
+
+When Turbo renewal and repeat usage become the binding growth constraint, maximizing raw applications sent without improving trust becomes increasingly irrational. At that point, the product should still optimize for speed, but shift from maximizing raw applications sent to maximizing **trusted qualified applications submitted**. The goal is not to add manual review everywhere. It is to automate low-risk tasks aggressively while escalating only high-risk or low-confidence decisions.
 
 ## 6. Recommendations (prioritized)
 
