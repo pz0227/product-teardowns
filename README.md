@@ -2,6 +2,8 @@
 
 PM-style teardowns of products I actually use — feelings as signals, evidence as proof.
 
+Mostly **AI products**, because that's where the hardest product question lives right now: *can users trust what the AI does on their behalf?* The occasional classic product shows up too — good fundamentals transfer.
+
 ## Teardowns
 
 Sorted alphabetically. Each folder contains the full teardown + a dated evidence log.
