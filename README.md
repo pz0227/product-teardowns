@@ -8,7 +8,7 @@ Sorted alphabetically. Each folder contains the full teardown + a dated evidence
 
 | Product | Type | Industry | Status | One-line thesis |
 |---|---|---|---|---|
-| [Jobright.ai](./jobright-ai/teardown.md) | AI copilot · SaaS | Career & HR | 🚧 In progress | Optimized for "applications sent" — but the real prize is being the agent users trust to represent them when they're not watching. |
+| <img src="https://www.google.com/s2/favicons?domain=jobright.ai&sz=64" width="20" height="20" align="center"> **[Jobright.ai](./jobright-ai/teardown.md)** · [site ↗](https://jobright.ai) | AI copilot · SaaS | Career & HR | 🚧 In progress | Optimized for "applications sent" — but the real prize is being the agent users trust to represent them when they're not watching. |
 
 ## Why I do this
 
@@ -26,5 +26,8 @@ Every teardown follows [the same 6-part structure](./TEMPLATE.md) and must cite 
 
 ## Who am I
 
-Polly Zheng — early AI PM, psych + stats @Penn. Chasing that "users actually love it" feeling.
-[LinkedIn](https://www.linkedin.com/in/jh-zheng0227/) · [GitHub](https://github.com/pz0227) · [X @pollyyyyyyy_z](https://x.com/pollyyyyyyy_z)
+**Polly Zheng** — AI Product Manager · psychology + statistics @ Penn
+
+Chasing that "users actually love it" feeling, and learning in public.
+
+[**LinkedIn**](https://www.linkedin.com/in/jh-zheng0227/) · [**GitHub**](https://github.com/pz0227) · [**X** @pollyyyyyyy_z](https://x.com/pollyyyyyyy_z)
