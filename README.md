@@ -18,5 +18,5 @@ Every teardown follows [the same 6-part structure](./TEMPLATE.md) and must cite 
 
 ## Who am I
 
-Polly (Junhao) Zheng — early AI PM, psych + stats @ Penn.
+Polly Zheng — early AI PM, psych + stats @Penn.
 [LinkedIn](https://www.linkedin.com/in/jh-zheng0227/) · [GitHub](https://github.com/pz0227) · X: @ (TODO)
