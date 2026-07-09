@@ -1,0 +1,4 @@
+# Raw evidence screenshots are unredacted (personal contact info, GPA, etc.)
+# Never commit originals — publish only redacted copies placed in <product>/img/
+jobright-ai/evidence screenshots/
+.DS_Store

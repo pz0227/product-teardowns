@@ -19,6 +19,38 @@ This yields an unbiased execution-quality sample without full logging of 30+ dai
 
 **Positioning:** these are not population-level claims yet. They are a structured usability sample designed to identify where delegated job-search automation breaks trust.
 
+## 2026-07-08/09 — Screenshot evidence batch #1 (15 images, local `evidence screenshots/`, unredacted — kept out of git)
+
+> Status: cataloged by Claude from the raw screenshots; per-item context (company, what happened next, whether submitted) pending Polly's annotation pass. Redacted copies go to `img/` before anything is published.
+
+**A. Resume fabrication (tailoring)**
+- `make_up_resume_info_just_to_match_jd.png` — tailored resume invented DR bullets: "AI-powered banking features," "Utilized JIRA and agile methodologies." Neither exists in the canonical resume.
+- `resume_make_up_with_quantified_results.png` — invented quantified claim: "improving MVP release timelines by 18%," plus "backlog grooming," "bi-weekly demo sessions." Fabricated metric.
+- `resume_makeup.png` — all three jobs rewritten with generic agile filler ("backlog refinement sessions"; "structured backlog management" at an export company).
+
+**B. Critical fact errors (application forms)**
+- `wrong_info_about_last_employment_info.png` — "Name of Latest Employer" autofilled as "Boston Consulting Group (BCG)." Never worked there.
+- `wrong_info_miss_info.png` — education mapped as "Agricultural Business Technoiogy [sic], University of Pennsylvania" (actual: M.S.Ed in Statistics, Measurement, Assessment & Research Technology). UL Solutions application.
+- `use_some_very_old_days_past_month.png` — "How soon are you available to start?" → "2026-06-26," a date already in the past at fill time.
+- `salary_range_not_adjusted_same_as_last_time.png` — Salary Range filled "70000 to 70000": degenerate range, reused last-typed figure.
+- `aigc_is_wrong.png` — form instructs 'If "Yes", type Yes' → agent typed "relocating." Instruction not followed; answer ambiguous.
+
+**C. Execution-state misreporting (proposed NEW failure mode #7)**
+- `can_not_finish_auto_fill_with_even_simply_fields.png` — agent: "5/5 required fields filled. Form complete… click Submit Now" while the ATS simultaneously flags missing required Email and Phone (ClassDojo).
+- `said_filled_but_not.png` — panel: "3/3 required fields filled | 100%" while Field of Study sits empty (Globe Life).
+- `said_filled_but_not_filled_anything.png` — education/skills sections untouched (ADD buttons never clicked) while panel proceeds (Goldman Sachs).
+- `stuck_for_mins_and_not_filling.png` — "15/16 filled | 94%" including felony/background-check/references questions shown ✓, but the YES/NO toggles are unselected; stalled for minutes (PerformYard). Also: agent attempts to auto-answer legal/compliance questions.
+
+Why this is distinct from #3 (scan hangs): a hang is a visible failure the user can take over from; a **false success claim** invites submitting an incomplete or wrong application. It attacks TQA condition 3 (verified submission state) directly.
+
+**D. Execution coverage reality**
+- `stuck_at_agent_page_not_filling_info.png` — all pre-steps ✓, then "Fill Out Application Form 0/13" over a fully empty Greenhouse form (Clinical Architecture).
+- `autofill_not_avalable.png` — "Autofill Not Supported — Submit Request" on a non-partnered careers site; manual form empty (WebstaurantStore via Clark Associates careers).
+- `most_of_job_still_require_user_to_click_external_apply.png` — "supports application autofill only on the application site… Hit Autofill, review, submit, then click I've Applied" — assisted-manual flow, not delegation (Imagen).
+
+**E. Recommendation constraint violation (funnel 1, with receipt)**
+- `autofill_not_avalable.png` (JD panel, same image) — posting states "W-2 candidates only, H-1B sponsorship not available," yet the job was served/queued for a user whose profile requires future sponsorship.
+
 ## 2026-07-07 — Recommendation precision sample #1
 Sampled the top 7 recommendations in my feed (profile: entry-level PM/analyst, full-time, US):
 - ✅ Associate PM @ CSC Generation — relevant (86% "strong match")
