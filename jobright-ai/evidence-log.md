@@ -28,18 +28,28 @@ This yields an unbiased execution-quality sample without full logging of 30+ dai
 - `resume_make_up_with_quantified_results.png` — invented quantified claim: "improving MVP release timelines by 18%," plus "backlog grooming," "bi-weekly demo sessions." Fabricated metric.
 - `resume_makeup.png` — all three jobs rewritten with generic agile filler ("backlog refinement sessions"; "structured backlog management" at an export company).
 
+**Context annotations (2026-07-09, Polly):**
+- The fabricated tailored resumes (batch A) **were submitted to real jobs** — in many flows the agent completed submission before the user could intervene. There is no reliable per-application record of which fabricated version went where.
+- For several incidents (e.g., the BCG employer error, the ClassDojo submit prompt) Polly **cannot reconstruct the context** — which application, whether it shipped. At 30+ applications/day this is expected, and it is itself evidence for the P1 application-memory recommendation: *without an application record, even the user's own incidents are untraceable.*
+- Sponsorship-violating recommendations (batch E): roughly 1–2 observed in the past week — real but low-frequency.
+- Prevalence framing: 19 screenshots captured across 2026-07-08/09, most during the 07-09 batch of 30+ applications. Capture was opportunistic (worst moments screenshotted), so this is **incident documentation, not a rate estimate** — rates come from the random-audit sampling plan above.
+
 **B. Critical fact errors (application forms)**
 - `wrong_info_about_last_employment_info.png` — "Name of Latest Employer" autofilled as "Boston Consulting Group (BCG)." Never worked there.
 - `wrong_info_miss_info.png` — education mapped as "Agricultural Business Technoiogy [sic], University of Pennsylvania" (actual: M.S.Ed in Statistics, Measurement, Assessment & Research Technology). UL Solutions application.
 - `use_some_very_old_days_past_month.png` — "How soon are you available to start?" → "2026-06-26," a date already in the past at fill time.
 - `salary_range_not_adjusted_same_as_last_time.png` — Salary Range filled "70000 to 70000": degenerate range, reused last-typed figure.
 - `aigc_is_wrong.png` — form instructs 'If "Yes", type Yes' → agent typed "relocating." Instruction not followed; answer ambiguous.
+- `put_old_salary_range_for_new_postion_crazy_number.png` — total-compensation expectation filled as "**6500095000**": the saved range 65000–95000 concatenated into one ~$6.5B figure. Field-format blindness on top of value reuse.
+- `company_is_in_Des_Moines_iowa_but_put_SF_CA.png` — "location preference" filled "San Francisco, California (Hybrid)" on an application for a Des Moines, Iowa company. Context-blind reuse of a saved preference.
 
 **C. Execution-state misreporting (proposed NEW failure mode #7)**
 - `can_not_finish_auto_fill_with_even_simply_fields.png` — agent: "5/5 required fields filled. Form complete… click Submit Now" while the ATS simultaneously flags missing required Email and Phone (ClassDojo).
 - `said_filled_but_not.png` — panel: "3/3 required fields filled | 100%" while Field of Study sits empty (Globe Life).
 - `said_filled_but_not_filled_anything.png` — education/skills sections untouched (ADD buttons never clicked) while panel proceeds (Goldman Sachs).
 - `stuck_for_mins_and_not_filling.png` — "15/16 filled | 94%" including felony/background-check/references questions shown ✓, but the YES/NO toggles are unselected; stalled for minutes (PerformYard). Also: agent attempts to auto-answer legal/compliance questions.
+- `not_filling_most_basic_material(resume).png` — "11/11 required fields filled. Form complete… click Submit Now" while the ATS flags missing required **Resume** and **Current Company**. The agent invites submission of an application with no resume attached.
+- `missing:wrong_info_about_university.png` — "29/29 required fields filled | 100%" while Major is unset ("Make a Selection"), GPA is empty and error-highlighted, and State is unset.
 
 Why this is distinct from #3 (scan hangs): a hang is a visible failure the user can take over from; a **false success claim** invites submitting an incomplete or wrong application. It attacks TQA condition 3 (verified submission state) directly.
 

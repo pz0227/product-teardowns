@@ -86,9 +86,9 @@ Interviews per 100 TQAs · recruiter response rate · offer rate · retention / 
 
 These do not perfectly measure trust. But they make trust measurable enough to improve systematically.
 
-## 5. Diagnosis — six failure modes, four system gaps
+## 5. Diagnosis — seven failure modes, five system gaps
 
-The six failure modes I logged are concrete and memorable on their own — but they point to four underlying system-level product gaps:
+The failure modes I logged are concrete and memorable on their own — but they point to five underlying system-level product gaps:
 
 | # | Observed problem | Failure mode |
 |---|---|---|
@@ -98,6 +98,7 @@ The six failure modes I logged are concrete and memorable on their own — but t
 | 4 | Answers & cover letters read obviously AI-generated | **Voice + evidence grounding failure** |
 | 5 | Agent silently rewrites resume; user can't explain it in interviews | **Change traceability / interview-readiness failure** |
 | 6 | LinkedIn Easy Apply jobs included without the tailored resume | **Channel coverage / asset handoff failure** |
+| 7 | Agent reports "5/5 filled — form complete, Submit Now" while the ATS flags missing required fields (email, phone, even the resume itself); "100%" shown over visibly empty fields | **Execution-state misreporting failure** |
 
 ### The four underlying system gaps
 
@@ -107,6 +108,9 @@ The six failure modes I logged are concrete and memorable on their own — but t
 | **2 · Cross-site execution & asset routing** | #3 AI-scan failures, #6 Easy Apply handoff | Reliable fallback states, clear execution visibility, channel-aware resume handoff |
 | **3 · Evidence-grounded content generation** | #4 AIGC-sounding answers | An evidence bank, user voice controls, generation tied to real experiences |
 | **4 · Resume versioning & change traceability** | #5 unexplainable rewrites | Per-application resume history, visible diffs with reasons, an interview-prep view |
+| **5 · Execution-state integrity** | #7 false completion claims | Field state verified against the ATS's own validation (never self-reported); submit gates that block on verified state, not on the agent's belief |
+
+Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visible* failure the user can take over from. A **false success claim** actively invites submitting an incomplete application — it doesn't just fail to deliver value, it weaponizes the user's trust in the status UI. Observed compound case: the agent auto-submits tailored (sometimes fabricated) resumes before the user can intervene, then keeps no per-application record — the user cannot even reconstruct which version went where.
 
 **Root cause:** every one of these is *cheap* under an "Applications Sent" north star — the application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
 
@@ -132,11 +136,21 @@ When Turbo renewal and repeat usage become the binding growth constraint, maximi
 
 **P1 — Salary intelligence.** Parse the JD's posted pay range per job. Detect annual / monthly / hourly. Let the user set rules: "if the JD range is explicit, default to the midpoint"; "never apply below $X"; "prefer a range over a single number when asked for expected salary." Never blind-reuse the last-typed figure.
 
-**P1 — Resume diff + application memory.** Every JD-tailoring produces a diff: what changed, why, old bullet / new bullet, matching JD keyword. The exact submitted resume version is permanently attached to that application in the tracker — one click before an interview: *"this is the exact resume I submitted."*
+**P1 — Resume diff + application memory.** Every JD-tailoring produces a diff: what changed, why, old bullet / new bullet, matching JD keyword. The exact submitted resume version is permanently attached to that application in the tracker — one click before an interview: *"this is the exact resume I submitted."* **And a hard gate: no tailored resume is auto-submitted without either an explicit diff confirmation or a previously saved user approval rule** — observed today, the agent submits fabricated versions faster than the user can intervene.
 
 **P2 — Grounded writing.** Stop letting the model free-write "why are you a good fit." Build a user **evidence bank** — projects, metrics, stories, leadership/teamwork examples, preferred tone. Every generated answer cites which real experiences it used. No evidence → ask the user, don't invent.
 
-**P2 — Execution reliability.** For non-partnered ATS sites, classify before acting: full adapter / partial autofill / AI scan / unsupported. Show explicit status, expected steps, and a fallback. *"This site fills to ~60%; please confirm the rest"* beats an infinite loading state that ends with nothing.
+**P2 — Execution reliability + honest state.** For non-partnered ATS sites, classify before acting: full adapter / partial autofill / AI scan / unsupported. Show explicit status, expected steps, and a fallback. *"This site fills to ~60%; please confirm the rest"* beats an infinite loading state that ends with nothing. And completion claims must derive from the **ATS's own validation state, never the agent's belief** — a status panel that says "5/5 filled, Submit Now" while the form flags a missing resume is worse than no status panel at all.
+
+**P3 — Expose the agent as an API / MCP server.** The trust rules above become enforceable when the product's core capabilities are exposed as typed tools rather than UI automation — an API cannot misreport state the way a status panel can:
+
+| Tool | Contract | Which trust rule it enforces |
+|---|---|---|
+| `search_jobs(constraints)` | returns only roles passing the user's saved hard constraints, with match rationale | Qualified (funnel 1) |
+| `draft_answer(question, jd)` | returns `{answer, sources[]}` — every claim cites a canonical-profile entry; no source, no answer | Factually grounded |
+| `get_application_record(job_id)` | returns `{submitted_resume_version, answers[], submit_status, timestamp}` | Submission verified + interview-ready |
+
+This also positions Jobright for the agent ecosystem: users' own AI assistants (Claude, etc.) could operate Jobright safely through the same contracts.
 
 _TODO (Week 3): RICE scoring across these five + the tradeoffs I'd accept as their PM._
 
