@@ -100,7 +100,7 @@ The failure modes I logged are concrete and memorable on their own — but they 
 | 6 | LinkedIn Easy Apply jobs included without the tailored resume | **Channel coverage / asset handoff failure** |
 | 7 | Agent reports "5/5 filled — form complete, Submit Now" while the ATS flags missing required fields (email, phone, even the resume itself); "100%" shown over visibly empty fields | **Execution-state misreporting failure** |
 
-### The four underlying system gaps
+### The five underlying system gaps
 
 | System gap | Covers | What the product needs |
 |---|---|---|
@@ -111,6 +111,31 @@ The failure modes I logged are concrete and memorable on their own — but they 
 | **5 · Execution-state integrity** | #7 false completion claims | Field state verified against the ATS's own validation (never self-reported); submit gates that block on verified state, not on the agent's belief |
 
 Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visible* failure the user can take over from. A **false success claim** actively invites submitting an incomplete application — it doesn't just fail to deliver value, it weaponizes the user's trust in the status UI. Observed compound case: the agent auto-submits tailored (sometimes fabricated) resumes before the user can intervene — and the user, at 30+ applications/day, cannot reconstruct from memory which version went where. _(To verify: how much of this Jobright's existing application history actually covers — see evidence log. The critique is scoped to whatever it doesn't.)_
+
+### Failure attribution across the agent pipeline — why "better parsing" won't save it
+
+The intuitive diagnosis for a form-filling agent that fills things wrong is *"it can't read the page"* — bad parsing, weak OCR. That diagnosis is mostly wrong here, and the way to see it is to attribute every logged incident to a stage of the agent's pipeline:
+
+```
+① Page acquisition → ② Field understanding → ③ Value retrieval/generation → ④ Actuation → ⑤ State verification
+```
+
+(①  is DOM access for web ATS forms — OCR/CV only enters for PDF or image forms. ③ is the decision "does this value come from the user's profile, or does a model generate it?")
+
+| Stage | What it does | Logged evidence living there |
+|---|---|---|
+| ① Page acquisition | Get the form's structure (DOM, dynamic JS, iframes) | AI-scan hangs; "0/13" over an empty form; "Autofill Not Supported" |
+| ② Field understanding | What does this field mean? | Annual figure in monthly field; 'If "Yes", type Yes' instruction ignored |
+| ③ Value retrieval / generation | Where does the value come from? | **Fabricated employer (BCG); invented degree name; invented "18%" resume metric; stale past date; blind salary reuse** |
+| ④ Actuation | Actually write values, click buttons | Fields skipped while flow proceeds |
+| ⑤ State verification | Confirm what was actually written/submitted | **All of failure mode #7** (false "100%", "Submit Now" over missing required fields) |
+
+Two conclusions fall out of the attribution:
+
+1. **Perfect parsing would not prevent the worst failures.** The highest-stakes incidents — fabricated employer, invented metrics, stale answers — live in stage ③: the system *generates* where it should *retrieve*. That is a policy decision, not a perception limitation, and it is exactly what P0 ("read, never generated") fixes. Investing in better page understanding (①–②) buys coverage of the long tail of ATS sites; it buys zero trust on the sites that already work.
+2. **Stage ⑤ decides whether the user can even see stages ①–④ fail.** A parsing error under honest state reporting is an inconvenience; a parsing error under false "100% complete" claims becomes a submitted, wrong application. Gap 5 is load-bearing for the entire pipeline.
+
+Method note: this is the same fault-attribution discipline used in LLM eval work — attribute failures to pipeline stages *before* deciding where to invest. Two questions classify almost every incident: *did the system understand the field?* and *was the value retrieved or generated?*
 
 **Root cause:** every one of these is *cheap* under an "Applications Sent" north star — the application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
 
