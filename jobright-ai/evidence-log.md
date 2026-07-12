@@ -19,6 +19,9 @@ This yields an unbiased execution-quality sample without full logging of 30+ dai
 
 **Positioning:** these are not population-level claims yet. They are a structured usability sample designed to identify where delegated job-search automation breaks trust.
 
+## 2026-07-12 — Applied-tab verification (partial) + product update observed
+Checked Jobright's application history per the 07-09 verification item: the **Applied tab now links each application to the company and the resume version used** (appears to be a recent product update). Still missing/unverified: change diffs with rationale, archived free-text answers, pre-submit confirmation gate. P1 critique rescoped accordingly in teardown §6.
+
 ## 2026-07-08/09 — Screenshot evidence batch #1 (15 images, local `evidence screenshots/`, unredacted — kept out of git)
 
 > Status: cataloged by Claude from the raw screenshots; per-item context (company, what happened next, whether submitted) pending Polly's annotation pass. Redacted copies go to `img/` before anything is published.

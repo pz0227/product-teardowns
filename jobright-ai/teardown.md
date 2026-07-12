@@ -25,7 +25,21 @@ Consumer side is **freemium SaaS**: the free tier delivers matching and basic to
 
 ## 3. Core user journey
 
-_TODO (Polly): recommend → review → autofill → submit → (interview?). Where the journey delivers value and where it quietly hurts. Week 2._
+My journey as a paying Turbo user, stage by stage — where each stage delivers the value I pay for, and where it quietly hurts.
+
+**① Recommendations.** *Value:* one feed of plausibly matching jobs, replacing hours of searching across LinkedIn, company sites, and job boards. *Hurt:* "looks relevant" isn't the bar. Logged precision on my hard constraints: ~43% — internships for a full-time profile, an OCaml engineering role at "100% skills match," a "W-2 candidates only" posting served to a future-sponsorship user. It saves search time while it erodes my trust in the feed — I've started suspecting the match score is largely keyword-driven (untested hypothesis; worth probing).
+
+**② Reviewing a job (the match %).** *Value:* triage at volume. At 30+ applications a day, the percentage lets me sequence — the 80% match before the 60%. *Hurt:* the score can mask hard-constraint violations. A "90% match" that fails on sponsorship, salary, seniority, or employment type is worse than no score: it misleads exactly at the moment I'm using it to decide.
+
+**③ Autofill / agent application.** *Value:* the core reason I pay for Turbo. It kills repetitive form-filling, drafts answers, tailors the resume per JD (which genuinely helps pass ATS screens), and turns manual applying into a high-throughput workflow. *Hurt:* the most dangerous stage. The problem is not that it's slow — it's that it is **confidently wrong**: a $6.5B salary expectation, a fabricated employer, an invented "18%" metric, stale dates, a mishandled 'type Yes' instruction. Fabricated numbers on my resume are answers I cannot give in an interview. And on non-partnered sites, "autofill" often degrades into endless scanning that costs more time than it saves.
+
+**④ Submit.** *Value:* speed at the moment it matters — postings close fast; being early is real edge. If anything, I want this step *faster*. *Hurt:* **the submit button is the trust boundary.** Before it, an error is a draft problem; after it, the error is me. A false "100% complete" or an auto-submit I couldn't intercept converts a fixable mistake into a sent application carrying my name.
+
+**⑤ Tracking.** *Value:* at my volume, memory is impossible — I need to know which company, which resume version, which answers, what status. *Update (2026-07-12):* the Applied tab now links each application to the company and the resume version used — a genuine improvement, credit where due. *Hurt:* traceability doesn't neutralize fabrication — a logged fabricated resume is still a resume I have to defend live. And the record remains partial: no diff or rationale for what was changed, and (unverified) no archive of the free-text answers submitted for me.
+
+**⑥ Interview.** *Value:* the funnel's real end. An application is worth something only if it produces an interview I can walk into with confidence — a good agent should let me know exactly **what story it told about me, what image of me it built**. *Hurt:* the "profit analysis" episode — a tailored rewrite I couldn't explain when an interviewer asked. The cost of stage-③ fabrication isn't charged at submission; it settles here, weeks later.
+
+**The structural read:** value is front-loaded (①–④, where my time is saved); cost is back-loaded (④–⑥, where my trust is settled). The product books its win at submission; the user discovers the loss weeks later. That gap is the same attribution problem that lets an "applications sent" north star look healthy (§5).
 
 ## 4. Metrics analysis
 
@@ -110,7 +124,7 @@ The failure modes I logged are concrete and memorable on their own — but they 
 | **4 · Resume versioning & change traceability** | #5 unexplainable rewrites | Per-application resume history, visible diffs with reasons, an interview-prep view |
 | **5 · Execution-state integrity** | #7 false completion claims | Field state verified against the ATS's own validation (never self-reported); submit gates that block on verified state, not on the agent's belief |
 
-Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visible* failure the user can take over from. A **false success claim** actively invites submitting an incomplete application — it doesn't just fail to deliver value, it weaponizes the user's trust in the status UI. Observed compound case: the agent auto-submits tailored (sometimes fabricated) resumes before the user can intervene — and the user, at 30+ applications/day, cannot reconstruct from memory which version went where. _(To verify: how much of this Jobright's existing application history actually covers — see evidence log. The critique is scoped to whatever it doesn't.)_
+Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visible* failure the user can take over from. A **false success claim** actively invites submitting an incomplete application — it doesn't just fail to deliver value, it weaponizes the user's trust in the status UI. Observed compound case: the agent auto-submits tailored (sometimes fabricated) resumes before the user can intervene — and the user, at 30+ applications/day, cannot reconstruct from memory which version went where. _(Verified 2026-07-12, partially: the Applied tab now links each application to company + resume version. Still missing/unverified: change diffs with rationale, archived free-text answers, and any pre-submit confirmation gate — the critique is scoped to those.)_
 
 ### Failure attribution across the agent pipeline — why "better parsing" won't save it
 
@@ -161,7 +175,7 @@ When Turbo renewal and repeat usage become the binding growth constraint, maximi
 
 **P1 — Salary intelligence.** Parse the JD's posted pay range per job. Detect annual / monthly / hourly. Let the user set rules: "if the JD range is explicit, default to the midpoint"; "never apply below $X"; "prefer a range over a single number when asked for expected salary." Never blind-reuse the last-typed figure.
 
-**P1 — Resume diff + application memory.** Every JD-tailoring produces a diff: what changed, why, old bullet / new bullet, matching JD keyword. The exact submitted resume version is permanently attached to that application in the tracker — one click before an interview: *"this is the exact resume I submitted."* **And a hard gate: no tailored resume is auto-submitted without either an explicit diff confirmation or a previously saved user approval rule** — observed today, the agent submits fabricated versions faster than the user can intervene.
+**P1 — Resume diff + application memory.** *(Partially shipped as of Jul 2026: the Applied tab links each application to company + resume version — credit where due.)* What's still missing: every JD-tailoring produces a **diff** (what changed, why, old bullet / new bullet, matching JD keyword); the free-text answers are archived alongside; and a materially rewritten resume cannot be auto-submitted without confirmation or a saved approval rule. The bar stays the same — one click before an interview: *"this is exactly what was submitted on my behalf, and why."* **And a hard gate: no tailored resume is auto-submitted without either an explicit diff confirmation or a previously saved user approval rule** — observed today, the agent submits fabricated versions faster than the user can intervene.
 
 **P2 — Grounded writing.** Stop letting the model free-write "why are you a good fit." Build a user **evidence bank** — projects, metrics, stories, leadership/teamwork examples, preferred tone. Every generated answer cites which real experiences it used. No evidence → ask the user, don't invent.
 
