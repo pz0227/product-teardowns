@@ -1,49 +1,61 @@
 # Teardown: Jobright.ai
 
-> Status: 🚧 Draft v1 · Started 2026-07-07
-> My context: paying (Turbo) user, 350+ applications submitted through/alongside it. This teardown is based on logged daily usage, not a demo tour.
+> Status: Living analysis, maintained · Started 2026-07-07
+> My context: paying Turbo user, 350+ applications submitted through and alongside it. This teardown is based on logged daily usage, not a demo tour.
+
+## TL;DR
+
+Jobright is an AI job-search agent I pay for and use every day. It is genuinely fast, which is why I pay. But across 350+ real applications I logged 20+ documented failures where the agent misrepresented me: a fabricated employer, an invented "18%" resume metric, a $6,500,095,000 salary expectation, and a status panel claiming "form complete, submit now" while the resume field sat empty.
+
+**The core argument:** every one of these failures is invisible to the metric Jobright appears to optimize, applications sent. The application still goes out, the counter still increments, the dashboard looks healthy. The cost lands weeks later in an interview, where no product dashboard is looking. Value is front-loaded at apply-time; cost is back-loaded at interview-time.
+
+**What I would change:** replace the north star. Move from raw applications sent to **Trusted Qualified Applications (TQA)**: submitted successfully, matching the user's hard constraints, every critical fact traceable to the user's real profile, every resume change explainable in an interview. Each condition has a system-measurable proxy, so trust becomes something you can steer, not just hope for.
+
+**Why it matters commercially:** the product's entire value is trusted delegation. The day a user must re-verify every field the agent touched, the time savings evaporate and so does the subscription. For a subscription business, trust bugs are revenue bugs.
+
+**Highest-severity fix (my P0):** critical identity facts (employer, education, work authorization, salary) are *read, never generated*. When the agent is unsure, it stops and asks. This touches a small fraction of fields but removes the failure class that makes paying users quit.
 
 ## 1. Product overview
 
-Jobright.ai is an AI job-search copilot. Its core user is **the active job seeker who applies at volume across many sites — but still cares about application quality and personal truthfulness.** Three segments, with different stakes:
+Jobright.ai is an AI job-search copilot. Its core user is **the active job seeker who applies at volume across many sites, but still cares about application quality and personal truthfulness.** Three segments, with different stakes:
 
 | Segment | Core need | Why they use Jobright |
 |---|---|---|
-| **Volume-first applicants** | Apply to more jobs, faster | New grads, laid-off workers, career changers — need to kill repetitive form-filling |
-| **Quality-first applicants** | Every application must sound like *them* | PM / design / engineering professionals — cannot afford obviously-AI copy or fabricated claims |
-| **Constraint-heavy applicants** | Cannot apply wrong, cannot fill wrong | People with visa, salary, location, or work-authorization constraints — one wrong field is disqualifying |
+| **Volume-first applicants** | Apply to more jobs, faster | New grads, laid-off workers, career changers, need to kill repetitive form-filling |
+| **Quality-first applicants** | Every application must sound like *them* | PM / design / engineering professionals, cannot afford obviously-AI copy or fabricated claims |
+| **Constraint-heavy applicants** | Cannot apply wrong, cannot fill wrong | People with visa, salary, location, or work-authorization constraints, one wrong field is disqualifying |
 
 The in-product H1B-sponsor filter reveals how central the third segment is to its real user base.
 
 ## 2. Business model
 
-Consumer side is **freemium SaaS**: the free tier delivers matching and basic tools; **Turbo** puts the high-frequency, high-value, execution-heavy capabilities behind a subscription — the full agent, tailored materials, auto-apply, connection resources. There is also an employer-side recruiting product, so the long-term shape is likely **B2C subscription + B2B recruiting (two-sided)** — but Turbo itself sells *efficiency and outcomes to job seekers*.
+Consumer side is **freemium SaaS**: the free tier delivers matching and basic tools; **Turbo** puts the high-frequency, high-value, execution-heavy capabilities behind a subscription, the full agent, tailored materials, auto-apply, connection resources. There is also an employer-side recruiting product, so the long-term shape is likely **B2C subscription + B2B recruiting (two-sided)**, but Turbo itself sells *efficiency and outcomes to job seekers*.
 
-**Why I personally paid (the willingness-to-pay moment):** agent mode. Match scoring against my resume (93% / 80% / 72%), JD-tailored resume versions, and raw speed — the time that used to produce ~15 applications now produces 30+. Some submissions complete without me watching. New postings surface within hours. Generated answers handle the time-sink questions (why company / why fit / tell me about a time...).
+**Why I personally paid (the willingness-to-pay moment):** agent mode. Match scoring against my resume (93% / 80% / 72%), JD-tailored resume versions, and raw speed, the time that used to produce ~15 applications now produces 30+. Some submissions complete without me watching. New postings surface within hours. Generated answers handle the time-sink questions (why company / why fit / tell me about a time...).
 
-**The churn thesis (why the failures below are existential, not cosmetic):** the product's entire value is *trusted delegation*. The moment a user must re-verify every school name, referral answer, salary field, free-text answer, and resume edit, **the time saved by automation is eaten by verification** — and the willingness to keep paying collapses. For a subscription business, trust bugs are revenue bugs.
+**The churn thesis (why the failures below are existential, not cosmetic):** the product's entire value is *trusted delegation*. The moment a user must re-verify every school name, referral answer, salary field, free-text answer, and resume edit, **the time saved by automation is eaten by verification**, and the willingness to keep paying collapses. For a subscription business, trust bugs are revenue bugs.
 
 ## 3. Core user journey
 
-My journey as a paying Turbo user, stage by stage — where each stage delivers the value I pay for, and where it quietly hurts.
+My journey as a paying Turbo user, stage by stage, where each stage delivers the value I pay for, and where it quietly hurts.
 
-**① Recommendations.** *Value:* one feed of plausibly matching jobs, replacing hours of searching across LinkedIn, company sites, and job boards. *Hurt:* "looks relevant" isn't the bar. Logged precision on my hard constraints: ~43% — internships for a full-time profile, an OCaml engineering role at "100% skills match," a "W-2 candidates only" posting served to a future-sponsorship user. It saves search time while it erodes my trust in the feed — I've started suspecting the match score is largely keyword-driven (untested hypothesis; worth probing).
+**① Recommendations.** *Value:* one feed of plausibly matching jobs, replacing hours of searching across LinkedIn, company sites, and job boards. *Hurt:* "looks relevant" isn't the bar. Logged precision on my hard constraints: ~43%, internships for a full-time profile, an OCaml engineering role at "100% skills match," a "W-2 candidates only" posting served to a future-sponsorship user. It saves search time while it erodes my trust in the feed, I've started suspecting the match score is largely keyword-driven (untested hypothesis; worth probing).
 
-**② Reviewing a job (the match %).** *Value:* triage at volume. At 30+ applications a day, the percentage lets me sequence — the 80% match before the 60%. *Hurt:* the score can mask hard-constraint violations. A "90% match" that fails on sponsorship, salary, seniority, or employment type is worse than no score: it misleads exactly at the moment I'm using it to decide.
+**② Reviewing a job (the match %).** *Value:* triage at volume. At 30+ applications a day, the percentage lets me sequence, the 80% match before the 60%. *Hurt:* the score can mask hard-constraint violations. A "90% match" that fails on sponsorship, salary, seniority, or employment type is worse than no score: it misleads exactly at the moment I'm using it to decide.
 
-**③ Autofill / agent application.** *Value:* the core reason I pay for Turbo. It kills repetitive form-filling, drafts answers, tailors the resume per JD (which genuinely helps pass ATS screens), and turns manual applying into a high-throughput workflow. *Hurt:* the most dangerous stage. The problem is not that it's slow — it's that it is **confidently wrong**: a $6.5B salary expectation, a fabricated employer, an invented "18%" metric, stale dates, a mishandled 'type Yes' instruction. Fabricated numbers on my resume are answers I cannot give in an interview. And on non-partnered sites, "autofill" often degrades into endless scanning that costs more time than it saves.
+**③ Autofill / agent application.** *Value:* the core reason I pay for Turbo. It kills repetitive form-filling, drafts answers, tailors the resume per JD (which genuinely helps pass ATS screens), and turns manual applying into a high-throughput workflow. *Hurt:* the most dangerous stage. The problem is not that it's slow, it's that it is **confidently wrong**: a $6.5B salary expectation, a fabricated employer, an invented "18%" metric, stale dates, a mishandled 'type Yes' instruction. Fabricated numbers on my resume are answers I cannot give in an interview. And on non-partnered sites, "autofill" often degrades into endless scanning that costs more time than it saves.
 
-**④ Submit.** *Value:* speed at the moment it matters — postings close fast; being early is real edge. If anything, I want this step *faster*. *Hurt:* **the submit button is the trust boundary.** Before it, an error is a draft problem; after it, the error is me. A false "100% complete" or an auto-submit I couldn't intercept converts a fixable mistake into a sent application carrying my name.
+**④ Submit.** *Value:* speed at the moment it matters, postings close fast; being early is real edge. If anything, I want this step *faster*. *Hurt:* **the submit button is the trust boundary.** Before it, an error is a draft problem; after it, the error is me. A false "100% complete" or an auto-submit I couldn't intercept converts a fixable mistake into a sent application carrying my name.
 
-**⑤ Tracking.** *Value:* at my volume, memory is impossible — I need to know which company, which resume version, which answers, what status. *Update (2026-07-12):* the Applied tab now links each application to the company and the resume version used — a genuine improvement, credit where due. *Hurt:* traceability doesn't neutralize fabrication — a logged fabricated resume is still a resume I have to defend live. And the record remains partial: no diff or rationale for what was changed, and (unverified) no archive of the free-text answers submitted for me.
+**⑤ Tracking.** *Value:* at my volume, memory is impossible, I need to know which company, which resume version, which answers, what status. *Update (2026-07-12):* the Applied tab now links each application to the company and the resume version used, a genuine improvement, credit where due. *Hurt:* traceability doesn't neutralize fabrication, a logged fabricated resume is still a resume I have to defend live. And the record remains partial: no diff or rationale for what was changed, and (unverified) no archive of the free-text answers submitted for me.
 
-**⑥ Interview.** *Value:* the funnel's real end. An application is worth something only if it produces an interview I can walk into with confidence — a good agent should let me know exactly **what story it told about me, what image of me it built**. *Hurt:* the "profit analysis" episode — a tailored rewrite I couldn't explain when an interviewer asked. The cost of stage-③ fabrication isn't charged at submission; it settles here, weeks later.
+**⑥ Interview.** *Value:* the funnel's real end. An application is worth something only if it produces an interview I can walk into with confidence, a good agent should let me know exactly **what story it told about me, what image of me it built**. *Hurt:* the "profit analysis" episode, a tailored rewrite I couldn't explain when an interviewer asked. The cost of stage-③ fabrication isn't charged at submission; it settles here, weeks later.
 
 **The structural read:** value is front-loaded (①–④, where my time is saved); cost is back-loaded (④–⑥, where my trust is settled). The product books its win at submission; the user discovers the loss weeks later. That gap is the same attribution problem that lets an "applications sent" north star look healthy (§5).
 
 ## 4. Metrics analysis
 
-**I would not use raw "Applications Sent" as the north star.** It is trivially gameable, and it rewards the wrong behavior — every one of these counts as a "sent application":
+**I would not use raw "Applications Sent" as the north star.** It is trivially gameable, and it rewards the wrong behavior, every one of these counts as a "sent application":
 
 - an application with a fabricated referral answer
 - an annual salary figure filled into a monthly-pay field
@@ -57,10 +69,10 @@ Optimizing it turns the product into a **high-throughput spam engine**.
 
 An application counts toward TQA only if **all four** hold:
 
-1. **Qualified** — meets the user's hard constraints: location, work authorization, visa, salary floor, role type, seniority.
-2. **Factually correct** — critical fields (school, employment, referral, salary, work authorization) come from the user's canonical profile, rules, or explicit confirmation. Never model-guessed.
-3. **Submission succeeded** — actually submitted; not mid-scan, stuck, or partially filled.
-4. **Interview-ready** — the resume, cover letter, and free-text answers are traceable; the user can explain every change in an interview.
+1. **Qualified**, meets the user's hard constraints: location, work authorization, visa, salary floor, role type, seniority.
+2. **Factually correct**, critical fields (school, employment, referral, salary, work authorization) come from the user's canonical profile, rules, or explicit confirmation. Never model-guessed.
+3. **Submission succeeded**, actually submitted; not mid-scan, stuck, or partially filled.
+4. **Interview-ready**, the resume, cover letter, and free-text answers are traceable; the user can explain every change in an interview.
 
 ### Why TQA beats raw volume for every segment
 
@@ -72,17 +84,17 @@ An application counts toward TQA only if **all four** hold:
 
 ### Outcome metrics (guardrails, not the north star)
 
-Interviews per 100 TQAs · recruiter response rate · offer rate · retention / Turbo renewal. These are the real results — but they lag by weeks and are confounded by market conditions, candidate background, and hiring cycles. They validate the north star; they can't steer weekly product decisions.
+Interviews per 100 TQAs · recruiter response rate · offer rate · retention / Turbo renewal. These are the real results, but they lag by weeks and are confounded by market conditions, candidate background, and hiring cycles. They validate the north star; they can't steer weekly product decisions.
 
 ### Making TQA measurable at scale
 
 "Trusted Qualified Applications" should be operationalized through observable system signals rather than treated as a vague quality concept.
 
-**Qualified** — this should *not* be measured as "hard-constraint pass rate," because passing saved constraints is part of the definition itself. The key quality metrics measure failure instead, and belong to the **recommendation stage**:
+**Qualified**, this should *not* be measured as "hard-constraint pass rate," because passing saved constraints is part of the definition itself. The key quality metrics measure failure instead, and belong to the **recommendation stage**:
 - *Constraint violation rate*: % of recommended or submitted roles that violate user-saved hard constraints (work authorization, location, salary floor, seniority, job type, sponsorship).
 - *Post-recommendation rejection rate*: % of recommended jobs the user dismisses because they violate a saved requirement.
 
-**Factually grounded** — critical fields (education, employment history, referral status, work authorization, salary expectations) come from a canonical profile, saved user policy, or explicit confirmation:
+**Factually grounded**, critical fields (education, employment history, referral status, work authorization, salary expectations) come from a canonical profile, saved user policy, or explicit confirmation:
 - *Critical-field provenance coverage*: % of high-risk fields populated from a canonical profile, saved rule, or explicit confirmation.
 - *Critical-field correction rate*: % of high-risk autofilled fields later corrected by the user.
 - *Salary-context conflict rate*: % of applications where entered compensation conflicts with the job's stated range, compensation unit, or saved user rule.
@@ -100,9 +112,9 @@ Interviews per 100 TQAs · recruiter response rate · offer rate · retention / 
 
 These do not perfectly measure trust. But they make trust measurable enough to improve systematically.
 
-## 5. Diagnosis — seven failure modes, five system gaps
+## 5. Diagnosis, seven failure modes, five system gaps
 
-The failure modes I logged are concrete and memorable on their own — but they point to five underlying system-level product gaps:
+The failure modes I logged are concrete and memorable on their own, but they point to five underlying system-level product gaps:
 
 | # | Observed problem | Failure mode |
 |---|---|---|
@@ -112,7 +124,7 @@ The failure modes I logged are concrete and memorable on their own — but they 
 | 4 | Answers & cover letters read obviously AI-generated | **Voice + evidence grounding failure** |
 | 5 | Agent silently rewrites resume; user can't explain it in interviews | **Change traceability / interview-readiness failure** |
 | 6 | LinkedIn Easy Apply jobs included without the tailored resume | **Channel coverage / asset handoff failure** |
-| 7 | Agent reports "5/5 filled — form complete, Submit Now" while the ATS flags missing required fields (email, phone, even the resume itself); "100%" shown over visibly empty fields | **Execution-state misreporting failure** |
+| 7 | Agent reports "5/5 filled, form complete, Submit Now" while the ATS flags missing required fields (email, phone, even the resume itself); "100%" shown over visibly empty fields | **Execution-state misreporting failure** |
 
 ### The five underlying system gaps
 
@@ -124,17 +136,17 @@ The failure modes I logged are concrete and memorable on their own — but they 
 | **4 · Resume versioning & change traceability** | #5 unexplainable rewrites | Per-application resume history, visible diffs with reasons, an interview-prep view |
 | **5 · Execution-state integrity** | #7 false completion claims | Field state verified against the ATS's own validation (never self-reported); submit gates that block on verified state, not on the agent's belief |
 
-Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visible* failure the user can take over from. A **false success claim** actively invites submitting an incomplete application — it doesn't just fail to deliver value, it weaponizes the user's trust in the status UI. Observed compound case: the agent auto-submits tailored (sometimes fabricated) resumes before the user can intervene — and the user, at 30+ applications/day, cannot reconstruct from memory which version went where. _(Verified 2026-07-12, partially: the Applied tab now links each application to company + resume version. Still missing/unverified: change diffs with rationale, archived free-text answers, and any pre-submit confirmation gate — the critique is scoped to those.)_
+Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visible* failure the user can take over from. A **false success claim** actively invites submitting an incomplete application, it doesn't just fail to deliver value, it weaponizes the user's trust in the status UI. Observed compound case: the agent auto-submits tailored (sometimes fabricated) resumes before the user can intervene, and the user, at 30+ applications/day, cannot reconstruct from memory which version went where. _(Verified 2026-07-12, partially: the Applied tab now links each application to company + resume version. Still missing/unverified: change diffs with rationale, archived free-text answers, and any pre-submit confirmation gate, the critique is scoped to those.)_
 
-### Failure attribution across the agent pipeline — why "better parsing" won't save it
+### Failure attribution across the agent pipeline, why "better parsing" won't save it
 
-The intuitive diagnosis for a form-filling agent that fills things wrong is *"it can't read the page"* — bad parsing, weak OCR. That diagnosis is mostly wrong here, and the way to see it is to attribute every logged incident to a stage of the agent's pipeline:
+The intuitive diagnosis for a form-filling agent that fills things wrong is *"it can't read the page"*, bad parsing, weak OCR. That diagnosis is mostly wrong here, and the way to see it is to attribute every logged incident to a stage of the agent's pipeline:
 
 ```
 ① Page acquisition → ② Field understanding → ③ Value retrieval/generation → ④ Actuation → ⑤ State verification
 ```
 
-(①  is DOM access for web ATS forms — OCR/CV only enters for PDF or image forms. ③ is the decision "does this value come from the user's profile, or does a model generate it?")
+(①  is DOM access for web ATS forms, OCR/CV only enters for PDF or image forms. ③ is the decision "does this value come from the user's profile, or does a model generate it?")
 
 | Stage | What it does | Logged evidence living there |
 |---|---|---|
@@ -146,12 +158,12 @@ The intuitive diagnosis for a form-filling agent that fills things wrong is *"it
 
 Two conclusions fall out of the attribution:
 
-1. **Perfect parsing would not prevent the worst failures.** The highest-stakes incidents — fabricated employer, invented metrics, stale answers — live in stage ③: the system *generates* where it should *retrieve*. That is a policy decision, not a perception limitation, and it is exactly what P0 ("read, never generated") fixes. Investing in better page understanding (①–②) buys coverage of the long tail of ATS sites; it buys zero trust on the sites that already work.
+1. **Perfect parsing would not prevent the worst failures.** The highest-stakes incidents, fabricated employer, invented metrics, stale answers, live in stage ③: the system *generates* where it should *retrieve*. That is a policy decision, not a perception limitation, and it is exactly what P0 ("read, never generated") fixes. Investing in better page understanding (①–②) buys coverage of the long tail of ATS sites; it buys zero trust on the sites that already work.
 2. **Stage ⑤ decides whether the user can even see stages ①–④ fail.** A parsing error under honest state reporting is an inconvenience; a parsing error under false "100% complete" claims becomes a submitted, wrong application. Gap 5 is load-bearing for the entire pipeline.
 
-Method note: this is the same fault-attribution discipline used in LLM eval work — attribute failures to pipeline stages *before* deciding where to invest. Two questions classify almost every incident: *did the system understand the field?* and *was the value retrieved or generated?*
+Method note: this is the same fault-attribution discipline used in LLM eval work, attribute failures to pipeline stages *before* deciding where to invest. Two questions classify almost every incident: *did the system understand the field?* and *was the value retrieved or generated?*
 
-**Root cause:** every one of these is *cheap* under an "Applications Sent" north star — the application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
+**Root cause:** every one of these is *cheap* under an "Applications Sent" north star, the application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
 
 ### Steelman: why "Applications Sent" can remain rational for longer than it should
 
@@ -161,7 +173,7 @@ In an early growth stage, "applications sent" is immediate, visible, and easy fo
 
 Trust, factual accuracy, and interview readiness are less visible in the first-session experience. Adding confirmation steps for salary, referral status, resume edits, or free-text answers can introduce friction and reduce short-term completion rates. If I were on the team, I might initially make the same tradeoff.
 
-**There is also an attribution problem.** Many trust failures do not surface at the moment of submission. A wrong salary expectation, referral answer, work-authorization response, or unfamiliar resume edit may create problems days or weeks later — during recruiter screening, interview preparation, or renewal decisions. The user may silently correct the information, blame themselves, blame the employer's application flow, or simply stop using the product later. As a result, Jobright's core dashboards may record a successful application while missing the downstream trust cost. The product can look healthy on immediate throughput metrics even when it is gradually weakening user confidence.
+**There is also an attribution problem.** Many trust failures do not surface at the moment of submission. A wrong salary expectation, referral answer, work-authorization response, or unfamiliar resume edit may create problems days or weeks later, during recruiter screening, interview preparation, or renewal decisions. The user may silently correct the information, blame themselves, blame the employer's application flow, or simply stop using the product later. As a result, Jobright's core dashboards may record a successful application while missing the downstream trust cost. The product can look healthy on immediate throughput metrics even when it is gradually weakening user confidence.
 
 So the issue is not that optimizing for applications sent was irrational. The issue is that the metric becomes incomplete once Jobright is representing users in high-stakes decisions.
 
@@ -171,22 +183,22 @@ When Turbo renewal and repeat usage become the binding growth constraint, maximi
 
 ## 6. Recommendations (prioritized)
 
-**P0 — Critical profile facts.** Referral, work authorization, visa, education, employment, salary: these fields are **read, never generated** — sourced from the canonical profile, user rules, or explicit confirmation. When uncertain, the agent stops and asks. "Guess something reasonable" is not permitted for identity-level facts.
+**P0, Critical profile facts.** Referral, work authorization, visa, education, employment, salary: these fields are **read, never generated**, sourced from the canonical profile, user rules, or explicit confirmation. When uncertain, the agent stops and asks. "Guess something reasonable" is not permitted for identity-level facts.
 
-**P1 — Salary intelligence.** Parse the JD's posted pay range per job. Detect annual / monthly / hourly. Let the user set rules: "if the JD range is explicit, default to the midpoint"; "never apply below $X"; "prefer a range over a single number when asked for expected salary." Never blind-reuse the last-typed figure.
+**P1, Salary intelligence.** Parse the JD's posted pay range per job. Detect annual / monthly / hourly. Let the user set rules: "if the JD range is explicit, default to the midpoint"; "never apply below $X"; "prefer a range over a single number when asked for expected salary." Never blind-reuse the last-typed figure.
 
-**P1 — Resume diff + application memory.** *(Partially shipped as of Jul 2026: the Applied tab links each application to company + resume version — credit where due.)* What's still missing: every JD-tailoring produces a **diff** (what changed, why, old bullet / new bullet, matching JD keyword); the free-text answers are archived alongside; and a materially rewritten resume cannot be auto-submitted without confirmation or a saved approval rule. The bar stays the same — one click before an interview: *"this is exactly what was submitted on my behalf, and why."* **And a hard gate: no tailored resume is auto-submitted without either an explicit diff confirmation or a previously saved user approval rule** — observed today, the agent submits fabricated versions faster than the user can intervene.
+**P1, Resume diff + application memory.** *(Partially shipped as of Jul 2026: the Applied tab links each application to company + resume version, credit where due.)* What's still missing: every JD-tailoring produces a **diff** (what changed, why, old bullet / new bullet, matching JD keyword); the free-text answers are archived alongside; and a materially rewritten resume cannot be auto-submitted without confirmation or a saved approval rule. The bar stays the same, one click before an interview: *"this is exactly what was submitted on my behalf, and why."* **And a hard gate: no tailored resume is auto-submitted without either an explicit diff confirmation or a previously saved user approval rule**, observed today, the agent submits fabricated versions faster than the user can intervene.
 
-**P2 — Grounded writing.** Stop letting the model free-write "why are you a good fit." Build a user **evidence bank** — projects, metrics, stories, leadership/teamwork examples, preferred tone. Every generated answer cites which real experiences it used. No evidence → ask the user, don't invent.
+**P2, Grounded writing.** Stop letting the model free-write "why are you a good fit." Build a user **evidence bank**, projects, metrics, stories, leadership/teamwork examples, preferred tone. Every generated answer cites which real experiences it used. No evidence → ask the user, don't invent.
 
-**P2 — Execution reliability + honest state.** For non-partnered ATS sites, classify before acting: full adapter / partial autofill / AI scan / unsupported. Show explicit status, expected steps, and a fallback. *"This site fills to ~60%; please confirm the rest"* beats an infinite loading state that ends with nothing. And completion claims must derive from the **ATS's own validation state, never the agent's belief** — a status panel that says "5/5 filled, Submit Now" while the form flags a missing resume is worse than no status panel at all.
+**P2, Execution reliability + honest state.** For non-partnered ATS sites, classify before acting: full adapter / partial autofill / AI scan / unsupported. Show explicit status, expected steps, and a fallback. *"This site fills to ~60%; please confirm the rest"* beats an infinite loading state that ends with nothing. And completion claims must derive from the **ATS's own validation state, never the agent's belief**, a status panel that says "5/5 filled, Submit Now" while the form flags a missing resume is worse than no status panel at all.
 
-**P3 — Expose the agent as an API / MCP server.** The trust rules above become enforceable when the product's core capabilities are exposed as typed tools rather than UI automation — an API cannot misreport state the way a status panel can:
+**P3, Expose the agent as an API / MCP server.** The trust rules above become enforceable when the product's core capabilities are exposed as typed tools rather than UI automation, an API cannot misreport state the way a status panel can:
 
 | Tool | Contract | Which trust rule it enforces |
 |---|---|---|
 | `search_jobs(constraints)` | returns only roles passing the user's saved hard constraints, with match rationale | Qualified (funnel 1) |
-| `draft_answer(question, jd)` | returns `{answer, sources[]}` — every claim cites a canonical-profile entry; no source, no answer | Factually grounded |
+| `draft_answer(question, jd)` | returns `{answer, sources[]}`, every claim cites a canonical-profile entry; no source, no answer | Factually grounded |
 | `get_application_record(job_id)` | returns `{submitted_resume_version, answers[], submit_status, timestamp}` | Submission verified + interview-ready |
 
 This also positions Jobright for the agent ecosystem: users' own AI assistants (Claude, etc.) could operate Jobright safely through the same contracts.
