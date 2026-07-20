@@ -10,7 +10,7 @@ Sorted alphabetically. Each folder contains the full teardown + a dated evidence
 
 | Product | Type | Industry | Status | One-line thesis |
 |---|---|---|---|---|
-| <img src="https://www.google.com/s2/favicons?domain=jobright.ai&sz=64" width="20" height="20" align="center"> **[Jobright.ai](./jobright-ai/teardown.md)** · [site ↗](https://jobright.ai) | AI copilot · SaaS | Career & HR | 🚧 In progress | Optimized for "applications sent" — but the real prize is being the agent users trust to represent them when they're not watching. |
+| <img src="https://www.google.com/s2/favicons?domain=jobright.ai&sz=64" width="20" height="20" align="center"> **[Jobright.ai](./jobright-ai/teardown.md)** · [site ↗](https://jobright.ai) | AI copilot · SaaS | Career & HR | 📖 Living analysis · v2 | Optimized for "applications sent" — but the real prize is being the agent users trust to represent them when they're not watching. |
 
 ## Why I do this
 

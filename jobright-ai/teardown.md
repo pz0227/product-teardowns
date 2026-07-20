@@ -203,8 +203,38 @@ When Turbo renewal and repeat usage become the binding growth constraint, maximi
 
 This also positions Jobright for the agent ecosystem: users' own AI assistants (Claude, etc.) could operate Jobright safely through the same contracts.
 
-_TODO (Week 3): RICE scoring across these five + the tradeoffs I'd accept as their PM._
+### Draft RICE prioritization (assumptions stated, to be recalibrated with usage data)
 
-## 7. One-line product thesis
+Scored as (Reach x Impact x Confidence) / Effort. Reach is share of Turbo users touched per month, Impact on the 0.25 to 3 scale, Confidence discounted where my evidence is n-of-1, Effort in rough person-months.
+
+| Fix | R | I | C | E | Score | Reasoning in one line |
+|---|---|---|---|---|---|---|
+| P0 Read-never-generated for critical facts | 0.9 | 3.0 | 0.8 | 2 | **1.08** | Every user has critical fields; catastrophic-tail removal; incident-backed confidence; mostly policy plus plumbing |
+| P2 Execution honesty (ATS-verified state) | 0.8 | 2.0 | 0.8 | 2 | **0.64** | False success claims invite bad submissions; verified against ATS validation, not agent belief |
+| P1 Resume diff + confirmation gate | 0.6 | 2.0 | 0.7 | 2 | **0.42** | Partially shipped already; the gate is the missing half; confidence discounted for the same reason |
+| P1 Salary intelligence | 0.5 | 1.0 | 0.8 | 1 | **0.40** | Narrower blast radius than identity facts, but cheap and every incident is user-visible |
+| P2 Grounded writing (evidence bank) | 0.7 | 1.0 | 0.5 | 3 | **0.12** | Real value, but impact is diffuse and effort heavy; needs discovery on how users maintain a bank |
+| P3 Agent-as-API / MCP server | 0.2 | 2.0 | 0.5 | 4 | **0.05** | Strategic, not urgent; reach starts small; sequenced after trust fundamentals hold |
+
+The ranking confirms the priority labels assigned qualitatively, with one useful surprise: execution honesty scores nearly as high as the headline P0, because a truthful status panel protects users from every other failure class at once.
+
+## 7. Competitive landscape: the delegation-trust spectrum
+
+The job-application tool market sorts cleanly by one variable: **how much action the tool takes without a human in the loop.**
+
+| Tool | Delegation depth | Trust posture | Market signal |
+|---|---|---|---|
+| **Teal** | Organize only: bookmark, track, rate; light autofill assist | User does everything that matters | 4.9 on the Chrome Web Store; loved as a control tool |
+| **Simplify** | Autofill assistant: fills 100+ ATS forms, user reviews and clicks submit | Explicitly *not* an auto-apply bot; human owns the submit button | Free, ~90% field accuracy reported on modern ATSs; strong reputation |
+| **Jobright** | Agentic: matches, tailors, fills, and can complete submission | Delegation sold as the premium (Turbo) value | Growing, paid; the failures documented in this teardown |
+| **LazyApply** | Fully automated volume: hundreds of applications unattended | Volume first, accuracy afterthought | ~2.4 on Trustpilot, 52% one-star; complaints mirror this teardown's taxonomy: wrong work-authorization answers, half-filled forms, inflated counts |
+
+Two readings of this table.
+
+First, **external validation**: LazyApply's public reviews independently reproduce the failure classes I logged on Jobright, wrong answers on authorization questions, field mapping by name matching rather than meaning, submitted counts that flatter the tool rather than serve the user. These are not one product's bugs. They are what happens to any product in this category that optimizes throughput without a trust layer.
+
+Second, **the strategic opening**: user sentiment currently *inverts* with delegation depth. The tools people love most are the ones that do the least. That is not evidence that delegation is a bad product; it is evidence that nobody has yet shipped trustworthy delegation. Jobright sits at the deepest delegation point of any credible player, which means it is positioned to own the entire category the moment it closes the trust gap, and TQA is the operating metric that would get it there. The prize is not "faster than Simplify." The prize is being the first agent users don't feel they have to check.
+
+## 8. One-line product thesis
 
 > Jobright's opportunity is not simply to help users apply faster. It is to become a job-search agent that users trust to represent them accurately when they are not watching.
