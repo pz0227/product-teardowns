@@ -51,7 +51,27 @@ My journey as a paying Turbo user, stage by stage, where each stage delivers the
 
 **⑥ Interview.** *Value:* the funnel's real end. An application is worth something only if it produces an interview I can walk into with confidence. A good agent should let me know exactly **what story it told about me, what image of me it built**. *Hurt:* the "profit analysis" episode, a tailored rewrite I couldn't explain when an interviewer asked. The cost of stage-③ fabrication isn't charged at submission; it settles here, weeks later.
 
-**The structural read:** value is front-loaded (①–④, where my time is saved); cost is back-loaded (④–⑥, where my trust is settled). The product books its win at submission; the user discovers the loss weeks later. That gap is the same attribution problem that lets an "applications sent" north star look healthy (§5).
+**The structural read:** value is front-loaded (①–④, where my time is saved); cost is back-loaded (④–⑥, where my trust is settled). The product books its win at submission; the user discovers the loss weeks later.
+
+```mermaid
+flowchart LR
+    R["① Recommend"] --> V["② Review"] --> AF["③ Autofill"] --> S["④ Submit"] --> T["⑤ Track"] --> I["⑥ Interview"]
+    subgraph VALUE["VALUE delivered here (time saved)"]
+        R
+        V
+        AF
+        S
+    end
+    subgraph COST["COST settled here (trust spent)"]
+        S
+        T
+        I
+    end
+    style VALUE fill:#d6f5d6,stroke:#27ae60,color:#000
+    style COST fill:#ffd6d6,stroke:#c0392b,color:#000
+```
+
+Submit (④) sits in both zones: it is the last moment the product creates value and the first moment it can cost the user. That overlap is the trust boundary, and it is the same attribution gap that lets an "applications sent" north star look healthy while trust erodes (§5).
 
 ## 4. Metrics analysis
 
@@ -142,11 +162,28 @@ Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visib
 
 The intuitive diagnosis for a form-filling agent that fills things wrong is *"it can't read the page"*: bad parsing, weak OCR. That diagnosis is mostly wrong here, and the way to see it is to attribute every logged incident to a stage of the agent's pipeline:
 
-```
-① Page acquisition → ② Field understanding → ③ Value retrieval/generation → ④ Actuation → ⑤ State verification
+```mermaid
+flowchart LR
+    A["① Page<br/>acquisition"] --> B["② Field<br/>understanding"]
+    B --> C["③ Value retrieval<br/>/ generation"]
+    C --> D["④ Actuation"]
+    D --> E["⑤ State<br/>verification"]
+
+    A -.-> a["scan hangs,<br/>0/13 empty form"]
+    B -.-> b["monthly vs annual,<br/>'type Yes' ignored"]
+    C -.-> c["fabricated employer,<br/>invented 18% metric,<br/>stale date"]
+    D -.-> d["fields skipped"]
+    E -.-> e["false 100% complete,<br/>'Submit Now' over<br/>missing fields"]
+
+    classDef worst fill:#ffd6d6,stroke:#c0392b,stroke-width:2px,color:#000;
+    classDef minor fill:#fff4d6,stroke:#b8860b,color:#000;
+    class C,E worst;
+    class A,B,D minor;
+    class c,e worst;
+    class a,b,d minor;
 ```
 
-(①  is DOM access for web ATS forms, OCR/CV only enters for PDF or image forms. ③ is the decision "does this value come from the user's profile, or does a model generate it?")
+The two red stages carry the highest-severity failures, and neither is a parsing problem. ① is DOM access for web ATS forms (OCR/CV only enters for PDF or image forms). ③ is the decision *"does this value come from the user's profile, or does a model generate it?"* ⑤ is whether the agent tells the truth about what it just did.
 
 | Stage | What it does | Logged evidence living there |
 |---|---|---|
