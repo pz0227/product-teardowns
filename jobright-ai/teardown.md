@@ -29,9 +29,9 @@ The in-product H1B-sponsor filter reveals how central the third segment is to it
 
 ## 2. Business model
 
-Consumer side is **freemium SaaS**: the free tier delivers matching and basic tools; **Turbo** puts the high-frequency, high-value, execution-heavy capabilities behind a subscription, the full agent, tailored materials, auto-apply, connection resources. There is also an employer-side recruiting product, so the long-term shape is likely **B2C subscription + B2B recruiting (two-sided)**, but Turbo itself sells *efficiency and outcomes to job seekers*.
+Consumer side is **freemium SaaS**: the free tier delivers matching and basic tools; **Turbo** puts the high-frequency, high-value, execution-heavy capabilities behind a subscription: the full agent, tailored materials, auto-apply, and connection resources. There is also an employer-side recruiting product, so the long-term shape is likely **B2C subscription + B2B recruiting (two-sided)**, but Turbo itself sells *efficiency and outcomes to job seekers*.
 
-**Why I personally paid (the willingness-to-pay moment):** agent mode. Match scoring against my resume (93% / 80% / 72%), JD-tailored resume versions, and raw speed, the time that used to produce ~15 applications now produces 30+. Some submissions complete without me watching. New postings surface within hours. Generated answers handle the time-sink questions (why company / why fit / tell me about a time...).
+**Why I personally paid (the willingness-to-pay moment):** agent mode. Match scoring against my resume (93% / 80% / 72%), JD-tailored resume versions, and raw speed. The time that used to produce ~15 applications now produces 30+. Some submissions complete without me watching. New postings surface within hours. Generated answers handle the time-sink questions (why company, why fit, tell me about a time you...).
 
 **The churn thesis (why the failures below are existential, not cosmetic):** the product's entire value is *trusted delegation*. The moment a user must re-verify every school name, referral answer, salary field, free-text answer, and resume edit, **the time saved by automation is eaten by verification**, and the willingness to keep paying collapses. For a subscription business, trust bugs are revenue bugs.
 
@@ -39,17 +39,17 @@ Consumer side is **freemium SaaS**: the free tier delivers matching and basic to
 
 My journey as a paying Turbo user, stage by stage, where each stage delivers the value I pay for, and where it quietly hurts.
 
-**① Recommendations.** *Value:* one feed of plausibly matching jobs, replacing hours of searching across LinkedIn, company sites, and job boards. *Hurt:* "looks relevant" isn't the bar. Logged precision on my hard constraints: ~43%, internships for a full-time profile, an OCaml engineering role at "100% skills match," a "W-2 candidates only" posting served to a future-sponsorship user. It saves search time while it erodes my trust in the feed, I've started suspecting the match score is largely keyword-driven (untested hypothesis; worth probing).
+**① Recommendations.** *Value:* one feed of plausibly matching jobs, replacing hours of searching across LinkedIn, company sites, and job boards. *Hurt:* "looks relevant" isn't the bar. Logged precision on my hard constraints was ~43%: internships for a full-time profile, an OCaml engineering role at "100% skills match," a "W-2 candidates only" posting served to a future-sponsorship user. It saves search time while it erodes my trust in the feed. I've started suspecting the match score is largely keyword-driven (untested hypothesis, worth probing).
 
-**② Reviewing a job (the match %).** *Value:* triage at volume. At 30+ applications a day, the percentage lets me sequence, the 80% match before the 60%. *Hurt:* the score can mask hard-constraint violations. A "90% match" that fails on sponsorship, salary, seniority, or employment type is worse than no score: it misleads exactly at the moment I'm using it to decide.
+**② Reviewing a job (the match %).** *Value:* triage at volume. At 30+ applications a day, the percentage lets me sequence: the 80% match before the 60%. *Hurt:* the score can mask hard-constraint violations. A "90% match" that fails on sponsorship, salary, seniority, or employment type is worse than no score, because it misleads exactly at the moment I'm using it to decide.
 
-**③ Autofill / agent application.** *Value:* the core reason I pay for Turbo. It kills repetitive form-filling, drafts answers, tailors the resume per JD (which genuinely helps pass ATS screens), and turns manual applying into a high-throughput workflow. *Hurt:* the most dangerous stage. The problem is not that it's slow, it's that it is **confidently wrong**: a $6.5B salary expectation, a fabricated employer, an invented "18%" metric, stale dates, a mishandled 'type Yes' instruction. Fabricated numbers on my resume are answers I cannot give in an interview. And on non-partnered sites, "autofill" often degrades into endless scanning that costs more time than it saves.
+**③ Autofill / agent application.** *Value:* the core reason I pay for Turbo. It kills repetitive form-filling, drafts answers, tailors the resume per JD (which genuinely helps pass ATS screens), and turns manual applying into a high-throughput workflow. *Hurt:* this is the most dangerous stage. The problem is not that it's slow. It's that it is **confidently wrong**: a $6.5B salary expectation, a fabricated employer, an invented "18%" metric, stale dates, a mishandled 'type Yes' instruction. Fabricated numbers on my resume are answers I cannot give in an interview. And on non-partnered sites, "autofill" often degrades into endless scanning that costs more time than it saves.
 
-**④ Submit.** *Value:* speed at the moment it matters, postings close fast; being early is real edge. If anything, I want this step *faster*. *Hurt:* **the submit button is the trust boundary.** Before it, an error is a draft problem; after it, the error is me. A false "100% complete" or an auto-submit I couldn't intercept converts a fixable mistake into a sent application carrying my name.
+**④ Submit.** *Value:* speed at the moment it matters. Postings close fast, and being early is real edge; if anything, I want this step *faster*. *Hurt:* **the submit button is the trust boundary.** Before it, an error is a draft problem. After it, the error is me. A false "100% complete" or an auto-submit I couldn't intercept converts a fixable mistake into a sent application carrying my name.
 
-**⑤ Tracking.** *Value:* at my volume, memory is impossible, I need to know which company, which resume version, which answers, what status. *Update (2026-07-12):* the Applied tab now links each application to the company and the resume version used, a genuine improvement, credit where due. *Hurt:* traceability doesn't neutralize fabrication, a logged fabricated resume is still a resume I have to defend live. And the record remains partial: no diff or rationale for what was changed, and (unverified) no archive of the free-text answers submitted for me.
+**⑤ Tracking.** *Value:* at my volume, memory is impossible. I need to know which company, which resume version, which answers, what status. *Update (2026-07-12):* the Applied tab now links each application to the company and the resume version used, a genuine improvement, credit where due. *Hurt:* traceability doesn't neutralize fabrication. A logged fabricated resume is still a resume I have to defend live. And the record remains partial: no diff or rationale for what was changed, and (unverified) no archive of the free-text answers submitted for me.
 
-**⑥ Interview.** *Value:* the funnel's real end. An application is worth something only if it produces an interview I can walk into with confidence, a good agent should let me know exactly **what story it told about me, what image of me it built**. *Hurt:* the "profit analysis" episode, a tailored rewrite I couldn't explain when an interviewer asked. The cost of stage-③ fabrication isn't charged at submission; it settles here, weeks later.
+**⑥ Interview.** *Value:* the funnel's real end. An application is worth something only if it produces an interview I can walk into with confidence. A good agent should let me know exactly **what story it told about me, what image of me it built**. *Hurt:* the "profit analysis" episode, a tailored rewrite I couldn't explain when an interviewer asked. The cost of stage-③ fabrication isn't charged at submission; it settles here, weeks later.
 
 **The structural read:** value is front-loaded (①–④, where my time is saved); cost is back-loaded (④–⑥, where my trust is settled). The product books its win at submission; the user discovers the loss weeks later. That gap is the same attribution problem that lets an "applications sent" north star look healthy (§5).
 
@@ -136,11 +136,11 @@ The failure modes I logged are concrete and memorable on their own, but they poi
 | **4 · Resume versioning & change traceability** | #5 unexplainable rewrites | Per-application resume history, visible diffs with reasons, an interview-prep view |
 | **5 · Execution-state integrity** | #7 false completion claims | Field state verified against the ATS's own validation (never self-reported); submit gates that block on verified state, not on the agent's belief |
 
-Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visible* failure the user can take over from. A **false success claim** actively invites submitting an incomplete application, it doesn't just fail to deliver value, it weaponizes the user's trust in the status UI. Observed compound case: the agent auto-submits tailored (sometimes fabricated) resumes before the user can intervene, and the user, at 30+ applications/day, cannot reconstruct from memory which version went where. _(Verified 2026-07-12, partially: the Applied tab now links each application to company + resume version. Still missing/unverified: change diffs with rationale, archived free-text answers, and any pre-submit confirmation gate, the critique is scoped to those.)_
+Why gap 5 is distinct from gap 2: a hang or an unsupported site (#3) is a *visible* failure the user can take over from. A **false success claim** actively invites submitting an incomplete application. It doesn't just fail to deliver value; it weaponizes the user's trust in the status UI. Observed compound case: the agent auto-submits tailored (sometimes fabricated) resumes before the user can intervene, and the user, at 30+ applications/day, cannot reconstruct from memory which version went where. _(Verified 2026-07-12, partially: the Applied tab now links each application to company + resume version. Still missing/unverified: change diffs with rationale, archived free-text answers, and any pre-submit confirmation gate, the critique is scoped to those.)_
 
 ### Failure attribution across the agent pipeline, why "better parsing" won't save it
 
-The intuitive diagnosis for a form-filling agent that fills things wrong is *"it can't read the page"*, bad parsing, weak OCR. That diagnosis is mostly wrong here, and the way to see it is to attribute every logged incident to a stage of the agent's pipeline:
+The intuitive diagnosis for a form-filling agent that fills things wrong is *"it can't read the page"*: bad parsing, weak OCR. That diagnosis is mostly wrong here, and the way to see it is to attribute every logged incident to a stage of the agent's pipeline:
 
 ```
 ① Page acquisition → ② Field understanding → ③ Value retrieval/generation → ④ Actuation → ⑤ State verification
@@ -158,12 +158,12 @@ The intuitive diagnosis for a form-filling agent that fills things wrong is *"it
 
 Two conclusions fall out of the attribution:
 
-1. **Perfect parsing would not prevent the worst failures.** The highest-stakes incidents, fabricated employer, invented metrics, stale answers, live in stage ③: the system *generates* where it should *retrieve*. That is a policy decision, not a perception limitation, and it is exactly what P0 ("read, never generated") fixes. Investing in better page understanding (①–②) buys coverage of the long tail of ATS sites; it buys zero trust on the sites that already work.
+1. **Perfect parsing would not prevent the worst failures.** The highest-stakes incidents (fabricated employer, invented metrics, stale answers) live in stage ③: the system *generates* where it should *retrieve*. That is a policy decision, not a perception limitation, and it is exactly what P0 ("read, never generated") fixes. Investing in better page understanding (①–②) buys coverage of the long tail of ATS sites; it buys zero trust on the sites that already work.
 2. **Stage ⑤ decides whether the user can even see stages ①–④ fail.** A parsing error under honest state reporting is an inconvenience; a parsing error under false "100% complete" claims becomes a submitted, wrong application. Gap 5 is load-bearing for the entire pipeline.
 
-Method note: this is the same fault-attribution discipline used in LLM eval work, attribute failures to pipeline stages *before* deciding where to invest. Two questions classify almost every incident: *did the system understand the field?* and *was the value retrieved or generated?*
+Method note: this is the same fault-attribution discipline used in LLM eval work. Attribute failures to pipeline stages *before* deciding where to invest. Two questions classify almost every incident: *did the system understand the field?* and *was the value retrieved or generated?*
 
-**Root cause:** every one of these is *cheap* under an "Applications Sent" north star, the application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
+**Root cause:** every one of these is *cheap* under an "Applications Sent" north star. The application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
 
 ### Steelman: why "Applications Sent" can remain rational for longer than it should
 
@@ -231,10 +231,21 @@ The job-application tool market sorts cleanly by one variable: **how much action
 
 Two readings of this table.
 
-First, **external validation**: LazyApply's public reviews independently reproduce the failure classes I logged on Jobright, wrong answers on authorization questions, field mapping by name matching rather than meaning, submitted counts that flatter the tool rather than serve the user. These are not one product's bugs. They are what happens to any product in this category that optimizes throughput without a trust layer.
+First, **external validation**: LazyApply's public reviews independently reproduce the failure classes I logged on Jobright (wrong answers on authorization questions, field mapping by name matching rather than meaning, submitted counts that flatter the tool rather than serve the user). These are not one product's bugs. They are what happens to any product in this category that optimizes throughput without a trust layer.
 
 Second, **the strategic opening**: user sentiment currently *inverts* with delegation depth. The tools people love most are the ones that do the least. That is not evidence that delegation is a bad product; it is evidence that nobody has yet shipped trustworthy delegation. Jobright sits at the deepest delegation point of any credible player, which means it is positioned to own the entire category the moment it closes the trust gap, and TQA is the operating metric that would get it there. The prize is not "faster than Simplify." The prize is being the first agent users don't feel they have to check.
 
 ## 8. One-line product thesis
 
 > Jobright's opportunity is not simply to help users apply faster. It is to become a job-search agent that users trust to represent them accurately when they are not watching.
+
+## 9. If I were their PM: the first 90 days
+
+Analysis is cheap; sequencing is the job. What I'd actually do with this, in order:
+
+1. **Instrument before building.** Ship the measurement first: critical-field provenance coverage, critical-field correction rate, verified-submission rate. Right now the team likely cannot see these, which is why the failures stay invisible. You cannot move a number you do not log.
+2. **Land the P0 (read, never generated) on the top five identity fields**: employer, education, work authorization, referral, salary. Scope it to partnered ATSs first, where execution is reliable, so the fix isn't confounded by parsing failures.
+3. **Ship execution honesty in parallel**: completion state reads from the ATS's own validation, and the submit button blocks on verified state. This is the cheap fix that protects users from every other failure at once (it scored nearly as high as the P0 in RICE for exactly that reason).
+4. **Prove it on the north star.** Watch weekly TQA and critical-field correction rate move before touching the lower-priority items. If correction rate doesn't fall, the P0 was scoped wrong, and I'd rather learn that in month two than month six.
+
+The discipline this teardown demonstrates is the one I'd bring to the role: find the metric that explains the pattern, attribute failures to where they actually live, sequence fixes by impact over effort, and treat every claim as something that has to survive evidence.
