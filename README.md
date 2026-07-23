@@ -1,8 +1,10 @@
 # Product Teardowns
 
-PM-style teardowns of products I actually use. Feelings as signals, evidence as proof.
+**PM teardowns of AI products I actually pay for, built from logged daily usage, not demo tours.** Feelings as signals, evidence as proof.
 
-Mostly **AI products**, because that's where the hardest product question lives right now: *can users trust what the AI does on their behalf?* The occasional classic product shows up too, since good fundamentals transfer.
+Every claim traces to a dated observation. The recurring question: *can users trust what an AI does on their behalf?* The occasional classic product shows up too, since good fundamentals transfer.
+
+> **Start here:** the [Jobright.ai teardown](./jobright-ai/teardown.md), a paying user's analysis of an AI job-application agent across 350+ real applications, 20+ documented failures, a new north-star metric, and a competitive read on why nobody has shipped trustworthy AI delegation yet.
 
 ## Teardowns
 
