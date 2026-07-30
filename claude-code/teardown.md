@@ -1,6 +1,7 @@
 # Claude Code Teardown: When the Model Stops Being the Bottleneck
 
-> **Status:** 📖 Living analysis · v1. Written from a month of daily paid usage across three surfaces, with a [dated evidence log](./evidence-log.md). Same rules as [teardown #1](../jobright-ai/teardown.md): feelings as signals, evidence as proof, roast the tradeoff, not the team. Evidence base is four documented incidents and growing; claims that need frequency data are flagged as hypotheses.
+> **Status:** 📖 Living analysis · v1 · **Evidence maturity: early pattern hypothesis** (4 documented incidents, one user, logging ongoing; four incidents are enough to form a hypothesis, not to prove a market pattern)
+> Written from a month of daily paid usage across three surfaces, with a [dated evidence log](./evidence-log.md) and an [evidence index](./evidence-index.md). Same rules as [teardown #1](../jobright-ai/teardown.md): feelings as signals, evidence as proof, roast the tradeoff, not the team. Claims are labeled: **Observed** = documented incident · **Inference** = argued from evidence, not proven · **External signal** = public source · **Hypothesis** = stated to be tested.
 
 ## TL;DR
 

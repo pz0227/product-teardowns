@@ -1,7 +1,8 @@
 # Teardown: Jobright.ai
 
-> Status: Living analysis, maintained · Started 2026-07-07
+> Status: Living analysis, maintained · Started 2026-07-07 · **Evidence maturity: developed directional case** (sustained heavy usage, 20+ documented incidents, one user)
 > My context: paying Turbo user, 350+ applications submitted through and alongside it. This teardown is based on logged daily usage, not a demo tour.
+> Reading aid: claims are labeled by epistemic status where it matters. **Observed** = documented incident ([evidence index](./evidence-index.md)) · **Calculated** = from a documented sample · **Inference** = argued from behavior/incentives, not internal data · **External signal** = public source, dated · **Hypothesis** = stated to be tested.
 
 ## TL;DR
 
@@ -33,13 +34,13 @@ Consumer side is **freemium SaaS**: the free tier delivers matching and basic to
 
 **Why I personally paid (the willingness-to-pay moment):** agent mode. Match scoring against my resume (93% / 80% / 72%), JD-tailored resume versions, and raw speed. The time that used to produce ~15 applications now produces 30+. Some submissions complete without me watching. New postings surface within hours. Generated answers handle the time-sink questions (why company, why fit, tell me about a time you...).
 
-**The churn thesis (why the failures below are existential, not cosmetic):** the product's entire value is *trusted delegation*. The moment a user must re-verify every school name, referral answer, salary field, free-text answer, and resume edit, **the time saved by automation is eaten by verification**, and the willingness to keep paying collapses. For a subscription business, trust bugs are revenue bugs.
+**The churn thesis (inference: argued from the product's incentive structure, not from retention data I can see):** the product's entire value is *trusted delegation*. The moment a user must re-verify every school name, referral answer, salary field, free-text answer, and resume edit, **the time saved by automation is eaten by verification**, and the willingness to keep paying collapses. For a subscription business, trust bugs are revenue bugs.
 
 ## 3. Core user journey
 
 My journey as a paying Turbo user, stage by stage, where each stage delivers the value I pay for, and where it quietly hurts.
 
-**① Recommendations.** *Value:* one feed of plausibly matching jobs, replacing hours of searching across LinkedIn, company sites, and job boards. *Hurt:* "looks relevant" isn't the bar. Logged precision on my hard constraints was ~43%: internships for a full-time profile, an OCaml engineering role at "100% skills match," a "W-2 candidates only" posting served to a future-sponsorship user. It saves search time while it erodes my trust in the feed. I've started suspecting the match score is largely keyword-driven (untested hypothesis, worth probing).
+**① Recommendations.** *Value:* one feed of plausibly matching jobs, replacing hours of searching across LinkedIn, company sites, and job boards. *Hurt:* "looks relevant" isn't the bar. Logged precision on my hard constraints was ~43% (calculated: 3 of 7 usable in a documented sample, [JR-01](./evidence-index.md); a point estimate from one small sample, not a stable rate): internships for a full-time profile, an OCaml engineering role at "100% skills match," a "W-2 candidates only" posting served to a future-sponsorship user ([JR-25](./evidence-index.md)). It saves search time while it erodes my trust in the feed. I've started suspecting the match score is largely keyword-driven (untested hypothesis, worth probing).
 
 **② Reviewing a job (the match %).** *Value:* triage at volume. At 30+ applications a day, the percentage lets me sequence: the 80% match before the 60%. *Hurt:* the score can mask hard-constraint violations. A "90% match" that fails on sponsorship, salary, seniority, or employment type is worse than no score, because it misleads exactly at the moment I'm using it to decide.
 
@@ -200,7 +201,7 @@ Two conclusions fall out of the attribution:
 
 Method note: this is the same fault-attribution discipline used in LLM eval work. Attribute failures to pipeline stages *before* deciding where to invest. Two questions classify almost every incident: *did the system understand the field?* and *was the value retrieved or generated?*
 
-**Root cause:** every one of these is *cheap* under an "Applications Sent" north star. The application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
+**Root cause (inference: "Jobright optimizes applications sent" is read off the product's behavior and incentives, not their dashboards; see §10):** every one of these is *cheap* under an "Applications Sent" north star. The application still goes out, the counter still increments. Under TQA, every one of them subtracts. The metric explains the pattern.
 
 ### Steelman: why "Applications Sent" can remain rational for longer than it should
 
@@ -257,7 +258,7 @@ The ranking confirms the priority labels assigned qualitatively, with one useful
 
 ## 7. Competitive landscape: the delegation-trust spectrum
 
-The job-application tool market sorts cleanly by one variable: **how much action the tool takes without a human in the loop.**
+The job-application tool market sorts cleanly by one variable: **how much action the tool takes without a human in the loop.** (Ratings below are external signals, retrieved 2026-07: [JR-29, JR-30](./evidence-index.md). I have not independently audited the competitors.)
 
 | Tool | Delegation depth | Trust posture | Market signal |
 |---|---|---|---|

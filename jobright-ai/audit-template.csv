@@ -1,0 +1,2 @@
+date,company_role,platform_ats,method,time_to_complete_min,autofill_succeeded,critical_field_wrong,which_field,salary_handled_correctly,generated_content_needed_rewrite,resume_changes_explainable,correct_resume_version_used,submission_verified,notes
+TEMPLATE ROW - see audit-method.md for column definitions; delete this row before first use,,,,,,,,,,,,,
