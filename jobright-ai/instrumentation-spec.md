@@ -9,7 +9,7 @@ Scope note: an external proposal. Names and shapes follow common product-analyti
 1. **Provenance is a property, not a derived field.** Every value the agent writes carries where it came from at write time. Reconstructing provenance later is impossible, which is how these failures stay invisible today.
 2. **Never log the field's value.** Log its type, its risk class, and its provenance. The instrumentation for a trust problem must not itself become a privacy problem.
 3. **Self-reported completion is a separate event from verified completion.** They are different claims by different parties, and collapsing them is the bug ([failure mode #7](./teardown.md#5-diagnosis-seven-failure-modes-five-system-gaps)).
-4. **Every event carries `application_id`,** so an application can be reconstructed end to end and scored against the four TQA conditions.
+4. **Every event carries `application_id`,** so an application can be reconstructed end to end and scored against the four TQA conditions. Submission events additionally carry `submission_attempt_id`, because one application can be submitted several times and a later retry must not overwrite what happened on an earlier one.
 
 ## Field risk classes
 
@@ -66,14 +66,18 @@ Two events, on purpose. One is the agent's claim; the other is the site's.
 ```
 submission_attempted
   application_id        string
+  submission_attempt_id string      // unique per attempt, NOT per application
   attempted_at          timestamp
   ats_type              string      // greenhouse | workday | lever | unsupported | ...
   method                enum(partnered_adapter|ai_scan|easy_apply|assisted_manual)
   agent_reported_complete   bool    // what the status panel claimed
   required_fields_agent_count   int
   required_critical_fields  array<string>  // identity/compensation fields this form
-                                           // requires, captured at parse time and
-                                           // carried here so coverage is computable
+                                           // requires; see inventory trust below
+  required_field_inventory_source  enum(ats_schema|partner_adapter_contract|
+                                        ats_validation|dom_inventory|
+                                        agent_parser|manual_review|unknown)
+  required_field_inventory_status  enum(verified|partially_verified|unverified)
   material_changes_count    int            // material resume changes the agent made
                                            // for this application, so review coverage
                                            // can be checked against a declared total
@@ -82,23 +86,34 @@ submission_attempted
 
 submission_verified
   application_id        string
+  submission_attempt_id string      // which attempt this verifies
+  verified_at           timestamp
   verification_source   enum(ats_confirmation|redirect_state|email_receipt)
   verified              bool
   ats_reported_missing_fields   array<string>   // field types only, never values
-  latency_from_attempt_ms       int
 ```
 
 `verification_source` has no `none_available` value. "No signal arrived" is the **absence** of this event, not a variant of it. Encoding absence as a row would let a missing verification masquerade as a verification.
+
+#### Why the attempt id has to exist
+
+A single application can be submitted more than once: the agent claims completion, the site rejects it or reports missing fields, the user fixes something, and a second submission succeeds. Keyed only by `application_id`, the "latest verification wins" rule then reports that application as a success, and the agent's original false claim disappears from the data entirely.
+
+That is the wrong answer to the wrong question. **Application-level success and attempt-level reliability are different measurements.** The user eventually got the application in, which is what they care about. The agent still claimed a completion that was not true, which is what failure mode #7 is about, and a metric that lets a later retry absolve an earlier lie cannot detect the behavior it exists to detect.
+
+So: every submission the agent initiates gets a new `submission_attempt_id`. User retries, post-correction resubmissions, and repeated agent clicks are all separate attempts. Verification binds to the attempt, never to the application. Duplicate verification events **within one attempt** are deduplicated to the final authoritative state; verdicts **across attempts** never overwrite each other.
 
 #### Three metrics, not one
 
 The tempting single metric ("false success rate") hides a distinction that matters operationally. There are two different bad outcomes after the agent claims completion:
 
+All three are rates over **attempts**, not applications.
+
 | Metric | Definition | What it means |
 |---|---|---|
-| **Verified failure rate** | Agent claimed complete, a verification event arrived within the window, and it said `verified = false` | The site actively contradicted the agent. This is a confirmed lie by the status panel |
-| **Missing verification rate** | Agent claimed complete, no verification event arrived within the window | Nobody knows. Could be a successful submission on a site we cannot read, or a silent failure |
-| **Unconfirmed success rate** | The sum of the two | Operational risk: applications the user believes are submitted and we cannot confirm. **Not** proof that all of them failed |
+| **Verified failure rate** | Agent claimed complete on this attempt, a verification event arrived within the window, and it said `verified = false` | The site actively contradicted the agent. This is a confirmed lie by the status panel |
+| **Missing verification rate** | Agent claimed complete on this attempt, no verification event arrived within the window | Nobody knows. Could be a successful submission on a site we cannot read, or a silent failure |
+| **Unconfirmed success rate** | The sum of the two | Operational risk: attempts the user believes are submitted and we cannot confirm. **Not** proof that all of them failed |
 
 Keeping them apart matters because the fixes differ: verified failures are a correctness bug in the agent, while missing verifications are a coverage gap in the verification integration. Reporting only the combined number would let a team "improve" the metric by adding verification coverage without fixing a single incorrect claim.
 
@@ -114,7 +129,8 @@ with window_config(method, window_ms) as (
          ('assisted_manual', 86400000)
 ),
 attempts as (
-  select a.application_id, a.method, w.window_ms
+  -- The denominator is attempts, not applications and not joined event rows.
+  select a.application_id, a.submission_attempt_id, a.attempted_at, w.window_ms
   from submission_attempted a
   join window_config w on w.method = a.method
   where a.agent_reported_complete
@@ -123,31 +139,34 @@ attempts as (
     and a.attempted_at <= :as_of - make_interval(secs => w.window_ms / 1000.0)
 ),
 ranked as (
-  -- One verdict per application. A retry can produce several verification
-  -- events; the latest one inside the window is the authoritative answer.
-  select v.application_id, v.verified,
-         row_number() over (partition by v.application_id
-                            order by v.latency_from_attempt_ms desc) as rn
+  -- One verdict per ATTEMPT. Duplicate or delayed verifications inside a
+  -- single attempt collapse to the final authoritative state; verdicts from
+  -- different attempts on the same application never touch each other.
+  select v.submission_attempt_id, v.verified,
+         row_number() over (partition by v.submission_attempt_id
+                            order by v.verified_at desc) as rn
   from submission_verified v
-  join attempts a on a.application_id = v.application_id
-  where v.latency_from_attempt_ms <= a.window_ms
+  join attempts a on a.submission_attempt_id = v.submission_attempt_id
+  where v.verified_at <= a.attempted_at + make_interval(secs => a.window_ms / 1000.0)
 ),
-verdict as (select application_id, verified from ranked where rn = 1)
+verdict as (select submission_attempt_id, verified from ranked where rn = 1)
 select
-  count(*) as claimed_complete,
+  count(*) as attempts_claimed_complete,
   1.0 * count(*) filter (where d.verified = false)
       / nullif(count(*), 0) as verified_failure_rate,
-  1.0 * count(*) filter (where d.application_id is null)
+  1.0 * count(*) filter (where d.submission_attempt_id is null)
       / nullif(count(*), 0) as missing_verification_rate,
-  1.0 * count(*) filter (where d.verified = false or d.application_id is null)
+  1.0 * count(*) filter (where d.verified = false or d.submission_attempt_id is null)
       / nullif(count(*), 0) as unconfirmed_success_rate
 from attempts a
-left join verdict d on d.application_id = a.application_id;
+left join verdict d on d.submission_attempt_id = a.submission_attempt_id;
 ```
 
-**Why the NULL handling is written this way.** The obvious version of this query (`left join ... where not v.verified`) is wrong, and wrong in the direction that hides the worst case. When no verification event exists, `v.verified` is `NULL`, and `NOT NULL` evaluates to `NULL` rather than `TRUE`, so the application is silently excluded. That drops exactly the population this metric exists to find: the agent claimed success and nothing ever confirmed it. Missing verification is therefore detected by `d.application_id is null` (a fact about the join) rather than by negating a nullable boolean. `nullif(count(*), 0)` returns `NULL` instead of raising when no attempts qualify, and deduplicating to one verdict per application keeps a retried submission from fanning out the denominator.
+**Why the NULL handling is written this way.** The obvious version of this query (`left join ... where not v.verified`) is wrong, and wrong in the direction that hides the worst case. When no verification event exists, `v.verified` is `NULL`, and `NOT NULL` evaluates to `NULL` rather than `TRUE`, so the application is silently excluded. That drops exactly the population this metric exists to find: the agent claimed success and nothing ever confirmed it. Missing verification is therefore detected by `d.submission_attempt_id is null` (a fact about the join) rather than by negating a nullable boolean. `nullif(count(*), 0)` returns `NULL` instead of raising when no attempts qualify, and deduplicating to one verdict per attempt keeps repeated verification events from fanning out the denominator.
 
-**Test cases this query must handle**, verified against fixtures before publishing: verified success (excluded from both numerators); verified failure (counted once); no verification event at all (counted as missing, the case the naive query loses); agent never claimed completion (excluded from the denominator entirely); duplicate verification events where an early failure is superseded by a later success (latest verdict wins, counted once); a verification arriving after the window (counted as missing, by design); an attempt too recent for its window to have elapsed (excluded from the denominator); and an empty input (returns `NULL` rates rather than dividing by zero).
+**Test cases this query must handle**, verified against fixtures before publishing: verified success (excluded from both numerators); verified failure (counted once); no verification event at all (counted as missing, the case the naive query loses); agent never claimed completion (excluded from the denominator entirely); duplicate verifications inside one attempt where an early failure is superseded by a later success (latest verdict wins, counted once); **two attempts on the same application where the first is a verified failure and the second succeeds** (both counted, the first failure preserved); a verification arriving after the window (counted as missing, by design); an attempt too recent for its window to have elapsed (excluded); multiple attempts not inflating the denominator beyond one row each; and an empty input (returns `NULL` rates rather than dividing by zero).
+
+On the fixtures, grouping by `application_id` instead of `submission_attempt_id` reported one failure where there were two, because the retry's success overwrote the original false claim. That single grouping choice halved the measured failure rate.
 
 ### `constraint_evaluation_completed`
 Fires once per application when the constraint check runs. This event exists because **the absence of a violation is not evidence of qualification.** No violation event could equally mean every constraint passed, the check never ran, only some constraints were evaluated, the application came through an unsupported path, or the instrumentation itself failed. Those are very different states, and a metric that treats them alike will report its own blind spots as success.
@@ -188,6 +207,22 @@ critical_field_provenance_coverage
   / |required critical fields|          -- from submission_attempted.required_critical_fields
 ```
 
+**The denominator is itself a claim, and it needs a source.** If the form requires four identity fields and the parser only recognized three, an agent that resolves all three reports 100% coverage while a required field sits empty. That is the same shape as the failure this whole teardown is about: the agent deciding what "complete" means and then grading itself against its own list. A coverage number is only as trustworthy as the inventory underneath it, so the inventory carries its provenance too.
+
+| `required_field_inventory_source` | Trust | Why |
+|---|---|---|
+| `ats_schema` | **verified** | The form definition itself. Authoritative by construction |
+| `partner_adapter_contract` | **verified** | A maintained integration contract with a known field set |
+| `ats_validation` | **verified** | The site's own validation naming what it requires, before or after submit |
+| `manual_review` | **verified** | A human enumerated the form. Expensive, used for sampling and calibration |
+| `dom_inventory` | *partially verified* | Directional. Misses conditionally rendered and dynamically injected fields |
+| `agent_parser` | **unverified** | The agent's own reading. Cannot establish its own completeness |
+| `unknown` | **unverified** | Provenance not recorded |
+
+`required_field_inventory_status` is derived from the source, and only `verified` can support a complete TQA. `agent_parser` alone never can, by design: a self-reported inventory grading a self-reported completion is circular, and the circularity is invisible in the resulting number.
+
+**Cheap reconciliation using data we already log.** `submission_verified.ats_reported_missing_fields` is the site naming fields it required and did not receive. Any field there that is absent from `required_critical_fields` is proof that the inventory was incomplete for that attempt. That comparison costs nothing, retroactively downgrades the affected attempts, and gives an ongoing error rate for the parser itself, which is the number that would tell the team how far to trust `dom_inventory` in the first place.
+
 Permitted provenance depends on the field's risk class. The rule follows the teardown's P0: identity facts are read, never generated.
 
 | Risk class | Permitted provenance | Prohibited | Extra requirement |
@@ -213,8 +248,8 @@ With the events above, the north star is a query rather than a philosophy. An ap
 | TQA condition | Derivation |
 |---|---|
 | **Qualified** | A `constraint_evaluation_completed` event exists **and** `coverage = 1.0` **and** `result = 'pass'` **and** `constraints_unresolved` is empty |
-| **Factually grounded** | Every field in `required_critical_fields` has a `critical_field_resolved` event whose `provenance_type` is permitted for its risk class, giving coverage `= 1.0`; every `compensation` field additionally has `unit_validated = true` |
-| **Submission verified** | A `submission_verified` event exists within the method's window with `verified = true`. Missing verification fails this condition; it does not pass by default |
+| **Factually grounded** | `required_field_inventory_status = 'verified'` **and** every field in `required_critical_fields` has a `critical_field_resolved` event whose `provenance_type` is permitted for its risk class, giving coverage `= 1.0`, **and** every `compensation` field has `unit_validated = true`. An unverified or partially verified inventory fails this condition even at 100% measured coverage, because the coverage is measured against a list that may be short |
+| **Submission verified** | A `submission_verified` event exists for **this attempt** within the method's window with `verified = true`. Missing verification fails; it does not pass by default. A later successful attempt does not retroactively satisfy this condition for an earlier failed one |
 | **Interview-ready** | The count of `resume_change_reviewed` events with `is_material = true` and `user_action` in (`approved`, `edited`, `rejected`) equals `material_changes_count`. Counting the reviews rather than checking for the absence of `auto_applied_no_review` is deliberate: "no bad review event" is also satisfied by an application whose changes were never logged |
 
 Each of these can also fail for an uninteresting reason: the check never ran, the fields were never logged, the site could not be read. That is the point. An application whose qualification was never evaluated is not a Trusted Qualified Application, and the metric should say so out loud rather than let a gap in measurement read as a win.
