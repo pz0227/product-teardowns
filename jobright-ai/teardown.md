@@ -241,20 +241,22 @@ When Turbo renewal and repeat usage become the binding growth constraint, maximi
 
 This also positions Jobright for the agent ecosystem: users' own AI assistants (Claude, etc.) could operate Jobright safely through the same contracts.
 
-### Draft RICE prioritization (assumptions stated, to be recalibrated with usage data)
+### Prioritization (banded, because I don't have their internal data)
 
-Scored as (Reach x Impact x Confidence) / Effort. Reach is share of Turbo users touched per month, Impact on the 0.25 to 3 scale, Confidence discounted where my evidence is n-of-1, Effort in rough person-months.
+An earlier draft of this section used numeric RICE scores. I replaced it: precise reach percentages and person-month estimates imply knowledge of Jobright's user base and architecture that an external user does not have. Bands preserve the decision logic without the false precision. **Effort is the least knowable column from outside and is labeled accordingly.**
 
-| Fix | R | I | C | E | Score | Reasoning in one line |
+| Fix | Reach | Impact | Evidence strength | Est. effort | Reversibility | Decision |
 |---|---|---|---|---|---|---|
-| P0 Read-never-generated for critical facts | 0.9 | 3.0 | 0.8 | 2 | **1.08** | Every user has critical fields; catastrophic-tail removal; incident-backed confidence; mostly policy plus plumbing |
-| P2 Execution honesty (ATS-verified state) | 0.8 | 2.0 | 0.8 | 2 | **0.64** | False success claims invite bad submissions; verified against ATS validation, not agent belief |
-| P1 Resume diff + confirmation gate | 0.6 | 2.0 | 0.7 | 2 | **0.42** | Partially shipped already; the gate is the missing half; confidence discounted for the same reason |
-| P1 Salary intelligence | 0.5 | 1.0 | 0.8 | 1 | **0.40** | Narrower blast radius than identity facts, but cheap and every incident is user-visible |
-| P2 Grounded writing (evidence bank) | 0.7 | 1.0 | 0.5 | 3 | **0.12** | Real value, but impact is diffuse and effort heavy; needs discovery on how users maintain a bank |
-| P3 Agent-as-API / MCP server | 0.2 | 2.0 | 0.5 | 4 | **0.05** | Strategic, not urgent; reach starts small; sequenced after trust fundamentals hold |
+| P0 Read-never-generated for critical facts | High (every applicant has identity fields) | Critical (removes the catastrophic tail) | Strong: 9 verified incidents (JR-07..15) | Unknown, likely Medium (policy + profile plumbing) | Moderate (threshold tunable, rollback clean) | **Now** |
+| Execution honesty (ATS-verified state) | High (every autofill flow) | High (protects users from every other failure class) | Strong: 6 verified incidents (JR-16..21) | Unknown (depends on per-ATS validation access) | Easy (display-layer first) | **Now** |
+| Resume diff + confirmation gate | Medium (agent-mode users) | High (interview harm is the back-loaded cost) | Strong: JR-05, JR-26; partially shipped (JR-27) | Medium (assumed: versioning exists per JR-27) | Easy | **Next** |
+| Salary intelligence | Medium (salary fields are common, not universal) | Medium (visible, embarrassing, but narrower) | Strong: JR-12, JR-13 | Small (assumed: parsing + rules) | Easy | **Next** |
+| Grounded writing (evidence bank) | High (all generated content) | Medium (diffuse) | Directional: JR-05 plus my qualitative read | Large (new user-facing system) | Moderate | **Validate first** (how would users maintain a bank?) |
+| Agent-as-API / MCP server | Low initially | High (strategic position) | Weak (my inference about the agent ecosystem) | Large | Difficult (public contracts) | **Later** |
 
-The ranking confirms the priority labels assigned qualitatively, with one useful surprise: execution honesty scores nearly as high as the headline P0, because a truthful status panel protects users from every other failure class at once.
+**What first and why:** P0 and execution honesty together, because they attack the two red pipeline stages (③ value generation, ⑤ state verification) that carry every catastrophic incident, and both are policy/display changes before they are ML changes.
+**The assumption that could change the decision:** prevalence. If random audits (see [audit method](./audit-method.md)) showed critical-field errors on well under 1% of applications, the P0 drops below execution honesty, which stays justified at any error rate because false success claims are harmful even when rare.
+**What needs validation before engineering commitment:** the pause-rate tradeoff (§10.3): a trust gate that interrupts too often destroys the speed users pay for. The [validation plan](./validation-plan.md) specifies the experiment.
 
 ## 7. Competitive landscape: the delegation-trust spectrum
 
@@ -279,14 +281,37 @@ Second, **the strategic opening**: user sentiment currently *inverts* with deleg
 
 ## 9. If I were their PM: the first 90 days
 
-Analysis is cheap; sequencing is the job. What I'd actually do with this, in order:
+Framed honestly: this is **what I would propose to validate with the team**, not what the company must do. I don't know their staffing, architecture, or what their dashboards already show; each phase below ends in a decision the real data would make.
 
-1. **Instrument before building.** Ship the measurement first: critical-field provenance coverage, critical-field correction rate, verified-submission rate. Right now the team likely cannot see these, which is why the failures stay invisible. You cannot move a number you do not log.
-2. **Land the P0 (read, never generated) on the top five identity fields**: employer, education, work authorization, referral, salary. Scope it to partnered ATSs first, where execution is reliable, so the fix isn't confounded by parsing failures.
-3. **Ship execution honesty in parallel**: completion state reads from the ATS's own validation, and the submit button blocks on verified state. This is the cheap fix that protects users from every other failure at once (it scored nearly as high as the P0 in RICE for exactly that reason).
-4. **Prove it on the north star.** Watch weekly TQA and critical-field correction rate move before touching the lower-priority items. If correction rate doesn't fall, the P0 was scoped wrong, and I'd rather learn that in month two than month six.
+**Days 1-30 · Instrument and size the problem**
+- *Objective:* turn incident documentation into internal rates. You cannot move a number you do not log.
+- *Key actions:* log critical-field provenance coverage, critical-field correction rate, and verified-submission rate; run an internal audit sample mirroring the [audit method](./audit-method.md); interview users across the three segments (§1) on what they re-check and why.
+- *Involves:* data/analytics, a backend engineer for instrumentation, user research.
+- *Decision at exit:* is the critical-field error rate high enough to justify the P0 gate, or is execution honesty alone the right first bet?
+- *Exit criterion:* the three rates exist on a dashboard with two weeks of baseline.
+- *Risk:* instrumentation reveals the problem is smaller than my n=1 experience suggests. That is a good outcome; it redirects effort before code is written.
+- *Not building yet:* the gate itself, the evidence bank, anything user-facing.
 
-The discipline this teardown demonstrates is the one I'd bring to the role: find the metric that explains the pattern, attribute failures to where they actually live, sequence fixes by impact over effort, and treat every claim as something that has to survive evidence.
+**Days 31-60 · Ship the two honest-by-design fixes to a cohort**
+- *Objective:* remove the catastrophic tail (P0) and the false-success class (execution honesty) behind a flag.
+- *Key actions:* read-never-generated on the top five identity fields, partnered ATSs first so parsing noise doesn't confound it; completion state derived from ATS validation; a pre-submit block on unverified state; pause-and-ask UX for low-confidence fields.
+- *Involves:* product, design (the pause moment must resolve in one tap), engineering, support (incident intake).
+- *Decision at exit:* does the gate's pause rate stay within the friction budget while correction rate falls?
+- *Metrics:* critical-field correction rate (target: falling), pause rate per application, pause resolution time, completion rate (guardrail).
+- *Exit criterion:* cohort shows correction rate down without completion rate degrading beyond the agreed guardrail.
+- *Risk:* over-gating. §10.3 names the falsification condition; the rollback is a threshold change, not a rebuild.
+- *Not building yet:* full evidence bank, API surface.
+
+**Days 61-90 · Prove it on the north star, then widen**
+- *Objective:* validate that TQA moves and decide the next investment.
+- *Key actions:* run weekly TQA against the applications-sent baseline for the cohort; ship the resume-diff confirmation gate (the missing half of JR-27); publish the trust metrics internally so the team sees what the volume dashboard cannot.
+- *Involves:* product, data, leadership (north-star discussion is an org decision, not a PM edict).
+- *Decision at exit:* adopt TQA as the operating metric for agent quality, or refine its conditions based on what the cohort data contradicted.
+- *Exit criterion:* a written recommendation memo with cohort evidence attached.
+- *Risk:* TQA conditions prove too strict to be motivating; the answer is recalibrating proxies, not abandoning the trust framing.
+- *Not building yet:* MCP/API exposure; it inherits whatever trust rules survive this quarter.
+
+The discipline this plan demonstrates is the one I'd bring to the role: instrument before building, ship the honesty layer before the capability layer, and let a named falsification condition, not sunk cost, decide month three.
 
 ## 10. Where this analysis could be wrong
 

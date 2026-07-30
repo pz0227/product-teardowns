@@ -97,17 +97,19 @@ The teardown rule: explain the builder before judging them.
 
 ## 7. Recommendations, prioritized
 
-RICE scored. Reach: how many users hit it (of active subscribers, estimated from incident type). Impact: effect on trust/retention when hit (3 = massive). Confidence reflects that frequency data is still thin. Effort in engineer-months, rough.
+Banded rather than numerically scored: an external user does not know this team's architecture or how many subscribers run long sessions, and precise reach or engineer-month figures would imply otherwise. Reach here is conditional ("of users who..."), impact is when-hit severity, and evidence strength is honest about the n=4 base.
 
-| # | Fix | Reach | Impact | Confidence | Effort | RICE | Notes |
+| # | Fix | Reach | Impact | Evidence strength | Est. effort | Reversibility | Decision |
 |---|---|---|---|---|---|---|---|
-| 1 | **Continuity contract**: on compaction, disclose what was kept vs. dropped ("I've summarized our earlier discussion; decisions I'm still holding: X, Y, Z"), and let the user pin decisions that must survive | High (every long session) | 3 | 70% | 2 | **High** | Converts silent degradation into a visible, correctable moment. Cheapest trust win per unit effort |
-| 2 | **Capability disclosure per surface**: each surface states up front what context it has ("this device has no access to your desktop memory") instead of failing silently | High (every multi-surface user) | 2 | 80% | 1 | **High** | Does not require syncing memory, only honesty about its absence. Teardown #1's lesson: silence beats a plausible-but-wrong impression of knowing you |
-| 3 | **Task-aware model routing assist**: recommend a tier per task with a one-line rationale, user retains override | Medium-high | 2 | 60% | 3 | Medium | Keeps professional control (steelman #3) while removing the prediction burden |
-| 4 | **Portable memory, opt-in**: account-level memory that travels across surfaces, with explicit user control over what syncs | Medium (multi-surface users) | 3 | 50% | 8+ | Medium-low | The real fix for cross-surface fragmentation, but heavy: privacy architecture, enterprise review, sync conflicts. Sequence after 1 and 2 prove the trust thesis |
-| 5 | **Session decision ledger**: a lightweight, user-visible list of standing agreements the agent maintains and honors across a project | Medium | 2 | 50% | 4 | Medium-low | Overlaps with 1; ship 1 first, promote to ledger if pin-usage shows demand |
+| 1 | **Continuity contract**: on compaction, disclose what was kept vs. dropped, and let the user pin decisions that must survive | High among long-session users; share of base unknown | Critical when hit (silent wrong actions) | Directional (CC-04, single user, multiple instances) | Small-Medium (display + pinning, no new memory infra) | Easy | **Now** (as a proposal) |
+| 2 | **Capability disclosure per surface**: each surface states what context it does and does not have, instead of failing silently | High among multi-surface users | High (prevents misplaced expectations) | Directional (CC-01) | Small (honesty about absence, not syncing) | Easy | **Now** (as a proposal) |
+| 3 | **Task-aware model routing assist**: recommend a tier per task with a one-line rationale, user keeps override | Medium (multi-tier users) | Medium (money and correction time) | Weak-Directional (CC-03, comparative judgment) | Medium | Easy | **Validate first** (do users want the recommendation, or resent it?) |
+| 4 | **Portable memory, opt-in**: account-level memory that travels across surfaces, user controls what syncs | Medium | Critical (the real fix for CC-01) | Directional | Large (privacy architecture, sync conflicts, enterprise review) | Difficult | **Validate first**, sequenced after 1 and 2 prove demand |
+| 5 | **Session decision ledger**: user-visible standing agreements the agent maintains across a project | Medium | High | Directional (overlaps CC-04) | Medium | Easy | **Later**: ship 1 first, promote if pin-usage shows demand |
 
-The ordering logic mirrors teardown #1: **fix disclosure before fixing capability.** Recommendations 1 and 2 require no new memory infrastructure at all; they simply stop the product from implying continuity it does not have. That is the cheapest possible purchase of the most valuable asset an agent has.
+**What first and why:** 1 and 2, because they are honesty features rather than capability features: they require no new memory infrastructure, only stopping the product from implying continuity it does not have. Same ordering logic as teardown #1: fix disclosure before capability.
+**The assumption that could change the decision:** frequency. If instrumented data showed compaction loss affecting a tiny fraction of sessions, recommendation 1 drops to a power-user setting; disclosure (2) stays justified at any frequency.
+**What needs validation before engineering commitment:** whether pinning gets used (demand signal for 4), and the interruption cost of disclosure moments.
 
 ## 8. Competitive landscape: extending the delegation-trust spectrum
 
@@ -127,15 +129,35 @@ Two observations:
 
 ## 9. If I were their PM: the first 90 days
 
-Scoped to one workstream: continuity trust. The same discipline as teardown #1's plan: instrument before building, disclose before syncing.
+Framed honestly: **what I would propose to validate with the team.** I don't know this team's staffing, architecture, or existing telemetry; each phase ends in a decision their real data would make. Scoped to one workstream: continuity trust.
 
-**Days 1-30: measure the review tax.** Instrument the proxies from section 4 (post-compaction contradiction rate, re-teach frequency, cross-surface context misses, correction rounds by tenure). Sample long sessions; interview twenty power users about what they re-verify and why. Exit criterion: a number for how much completed work violates the TCW bar, so the problem has a size instead of a vibe.
+**Days 1-30 · Measure the review tax**
+- *Objective:* give the problem a size instead of a vibe.
+- *Key actions:* instrument the §4 proxies (post-compaction contradiction rate, re-teach frequency, cross-surface context misses, correction rounds by tenure); sample long sessions; interview power users about what they re-verify and why.
+- *Involves:* data/telemetry engineering, user research.
+- *Decision at exit:* is continuity loss frequent enough to justify product work, or is it a power-user tail issue?
+- *Exit criterion:* baseline numbers for the four proxies on a dashboard.
+- *Risk:* the data shows my n=4 pattern is rare. Good outcome; disclosure (phase 2) survives at any frequency, the rest gets rescoped.
+- *Not building yet:* anything user-facing.
 
-**Days 31-60: ship disclosure.** Recommendation 2 (per-surface capability statements) and the first half of recommendation 1 (compaction announcement with retained-decisions summary). Both are honesty features, not memory features; small effort, immediately visible. Measure: does re-teach frequency fall in sessions where disclosure fired?
+**Days 31-60 · Ship disclosure**
+- *Objective:* convert silent degradation into visible, correctable moments.
+- *Key actions:* per-surface capability statements (recommendation 2); compaction announcement with a retained-decisions summary (first half of recommendation 1), behind a flag to a cohort.
+- *Involves:* product, design (the disclosure moment must inform without interrupting flow), engineering.
+- *Decision at exit:* does re-teach frequency fall in sessions where disclosure fired?
+- *Metrics:* re-teach frequency (target: falling), disclosure-moment dismissal rate (guardrail for annoyance).
+- *Exit criterion:* cohort delta on re-teach frequency, in either direction, with enough volume to read.
+- *Risk:* disclosure reads as noise and users dismiss it unread; the design answer is placement and brevity, and the rollback is a flag.
+- *Not building yet:* memory sync, decision ledger.
 
-**Days 61-90: ship control.** Decision pinning (the second half of recommendation 1). Evaluate the data for whether portable memory (recommendation 4) earns its heavy investment, with the pin-usage rate as the demand signal. Publish the TCW definition internally as the north-star candidate and run it shadow against the existing completion metrics for a quarter.
-
-What I would explicitly not do in 90 days: build memory sync. Shipping continuity *promises* before continuity *infrastructure* is how the trust gap opened in the first place.
+**Days 61-90 · Ship control, decide on memory**
+- *Objective:* give users agency over what survives, and gather the demand signal for the big investment.
+- *Key actions:* decision pinning (second half of recommendation 1); run TCW shadow-scored against existing completion metrics; write the portable-memory go/no-go memo with pin-usage as the demand evidence.
+- *Involves:* product, data, and, for the memory memo, security/privacy review.
+- *Decision at exit:* does portable memory (recommendation 4) earn its heavy investment now, later, or not at all?
+- *Exit criterion:* the memo, with cohort evidence attached.
+- *Risk:* pinning is loved by a loud few and ignored by most; the memo must weigh intensity against breadth honestly.
+- *Not building in these 90 days:* memory sync itself. Shipping continuity promises before continuity infrastructure is how the trust gap opened in the first place.
 
 ## 10. Where this analysis could be wrong
 
