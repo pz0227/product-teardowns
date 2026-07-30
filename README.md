@@ -12,6 +12,7 @@ Sorted alphabetically. Each folder contains the full teardown plus a dated evide
 
 | Product | Type | Industry | Status | One-line thesis |
 |---|---|---|---|---|
+| <img src="https://www.google.com/s2/favicons?domain=claude.ai&sz=64" width="20" height="20" align="center"> **[Claude Code](./claude-code/teardown.md)** · [site ↗](https://claude.com/claude-code) | AI coding agent · SaaS | Developer tools | 🌱 v0 · evidence gathering | The deepest delegation I practice daily, and the trust failures aren't code quality: they're memory, continuity, and the review tax of being silently forgotten. |
 | <img src="https://www.google.com/s2/favicons?domain=jobright.ai&sz=64" width="20" height="20" align="center"> **[Jobright.ai](./jobright-ai/teardown.md)** · [site ↗](https://jobright.ai) | AI copilot · SaaS | Career & HR | 📖 Living analysis · v2 | Optimized for "applications sent," but the real prize is being the agent users trust to represent them when they're not watching. |
 
 ### What's inside the Jobright teardown
