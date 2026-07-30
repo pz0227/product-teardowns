@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trust Layer Prototype · Independent Concept</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>Application Trust Layer</h1>
+    <p class="sub">Independent product concept from the <a href="../../jobright-ai/teardown.md">Jobright.ai teardown</a>. Not affiliated with any company. All data below is fictional.</p>
+  </div>
+  <div class="pill" id="modePill">CONCEPT DEMO</div>
+</header>
+
+<main class="layout">
+
+  <!-- LEFT: application context -->
+  <section class="col">
+
+    <div class="card">
+      <h2>Application</h2>
+      <p class="jobline"><strong>Associate Product Manager</strong> · Meridian Analytics (fictional) · Des Moines, IA · Posted range: $70,000 to $85,000 / year</p>
+    </div>
+
+    <div class="card">
+      <h2>Critical facts <span class="hint">read, never generated</span></h2>
+      <p class="explain">High-risk identity facts may only come from the canonical profile, a saved user policy, or explicit confirmation. When a value is missing, the agent stops and asks. It never guesses something plausible.</p>
+      <table class="facts" id="factsTable" aria-label="Critical facts with provenance">
+        <thead>
+          <tr><th>Field</th><th>Value</th><th>Source</th><th>Confidence</th><th>Generation allowed?</th></tr>
+        </thead>
+        <tbody><!-- rendered by script.js --></tbody>
+      </table>
+      <div id="pauseBox" class="pause" hidden>
+        <strong>⏸ Agent paused.</strong> <span id="pauseText"></span>
+        <div class="pause-actions" id="pauseActions"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Resume changes <span class="hint">nothing ships unseen</span></h2>
+      <p class="explain">Every tailored edit is a before-and-after diff with a reason and its source. Material changes require approval before submission.</p>
+      <div id="diffList"><!-- rendered by script.js --></div>
+    </div>
+
+  </section>
+
+  <!-- RIGHT: trust gate + TQA -->
+  <section class="col narrow">
+
+    <div class="card gate">
+      <h2>Submission trust gate</h2>
+      <ul id="gateList" class="gate-list"><!-- rendered by script.js --></ul>
+      <button id="submitBtn" class="submit" disabled>Submit application</button>
+      <p class="gate-note" id="gateNote">Submission unlocks when every critical item is verified.</p>
+    </div>
+
+    <div class="card tqa" id="tqaCard">
+      <h2>Trusted Qualified Application?</h2>
+      <div id="tqaVerdict" class="tqa-verdict no">Not yet</div>
+      <ul id="tqaReasons" class="tqa-reasons"></ul>
+      <p class="explain small">TQA = qualified against saved constraints + every critical fact read from verified sources + submission verifiably completed + every material change reviewed. Defined in the <a href="../../jobright-ai/teardown.md">teardown</a>, §4.</p>
+    </div>
+
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Demonstration data is fictional (persona: "Jordan Lee"). This prototype demonstrates interaction logic for the teardown's P0 recommendation; it submits nothing, stores nothing, and calls no external service. <a href="README.md">Design rationale & limitations</a>.</p>
+</footer>
+
+<div class="toast" id="toast" hidden></div>
+<script src="script.js"></script>
+</body>
+</html>
