@@ -1,6 +1,6 @@
 # AI Product Teardowns: Can You Trust What an AI Does on Your Behalf?
 
-**PM teardowns of AI agents I actually pay for, built from logged daily usage with dated evidence, not demo tours.** One question runs through the series: as AI products act for users instead of just answering them, where does trust break, and what would a PM measure and build to fix it?
+**PM teardowns of AI products that I actually pay for, built from logged daily usage with dated evidence, not demo tours.** One question runs through the series: as AI products act for users instead of just answering them, where does trust break, and what would a PM measure and build to fix it?
 
 ## Start here (3 minutes)
 
