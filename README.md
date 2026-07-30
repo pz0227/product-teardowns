@@ -4,6 +4,8 @@
 
 ## Start here (3 minutes)
 
+▶ **[Try the interactive prototype](https://pz0227.github.io/product-teardowns/prototypes/jobright-trust-layer/)**: the trust layer from the flagship teardown, running in your browser. Refuse the invented resume claim and watch the submission gate respond.
+
 1. Read the flagship case summary: **[Jobright.ai in 3 minutes](./jobright-ai/summary.md)**
 2. Skim the strongest evidence: **[Jobright evidence index](./jobright-ai/evidence-index.md)**
 3. See diagnosis turned into product: **[Trust Layer prototype](./prototypes/jobright-trust-layer/)** (independent concept, not affiliated)
