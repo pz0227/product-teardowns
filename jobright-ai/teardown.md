@@ -8,6 +8,9 @@
 
 Jobright is an AI job-search agent I pay for and use every day. It is genuinely fast, which is why I pay. But across 350+ real applications I logged 20+ documented failures where the agent misrepresented me: a fabricated employer, an invented "18%" resume metric, a $6,500,095,000 salary expectation, and a status panel claiming "form complete, submit now" while the resume field sat empty.
 
+![Agent panel reporting "11/11 required fields filled. Form complete, click Submit Now" while the application site simultaneously flags a missing required Resume field](./img/submit-now-over-missing-resume.png)
+*The failure in one frame: the agent reports the form complete and invites submission, while the site itself flags the missing required resume. Redacted screenshot, [JR-20](./evidence-index.md); six more in [`img/`](./img/README.md).*
+
 **The core argument:** every one of these failures is invisible to the metric Jobright appears to optimize, applications sent. The application still goes out, the counter still increments, the dashboard looks healthy. The cost lands weeks later in an interview, where no product dashboard is looking. Value is front-loaded at apply-time; cost is back-loaded at interview-time.
 
 **What I would change:** replace the north star. Move from raw applications sent to **Trusted Qualified Applications (TQA)**: submitted successfully, matching the user's hard constraints, every critical fact traceable to the user's real profile, every resume change explainable in an interview. Each condition has a system-measurable proxy, so trust becomes something you can steer, not just hope for.
@@ -184,13 +187,16 @@ flowchart LR
     class a,b,d minor;
 ```
 
+![Compensation expectation field autofilled with the value 6500095000](./img/put_old_salary_range_for_new_postion_crazy_number.png)
+*Stage ③ in one field: a saved 65000 to 95000 range concatenated into a single ~$6.5B figure. Not a perception failure; a decision about where the value comes from. Redacted screenshot, [JR-13](./evidence-index.md).*
+
 The two red stages carry the highest-severity failures, and neither is a parsing problem. ① is DOM access for web ATS forms (OCR/CV only enters for PDF or image forms). ③ is the decision *"does this value come from the user's profile, or does a model generate it?"* ⑤ is whether the agent tells the truth about what it just did.
 
 | Stage | What it does | Logged evidence living there |
 |---|---|---|
 | ① Page acquisition | Get the form's structure (DOM, dynamic JS, iframes) | AI-scan hangs; "0/13" over an empty form; "Autofill Not Supported" |
 | ② Field understanding | What does this field mean? | Annual figure in monthly field; 'If "Yes", type Yes' instruction ignored |
-| ③ Value retrieval / generation | Where does the value come from? | **Fabricated employer (BCG); invented degree name; invented "18%" resume metric; stale past date; blind salary reuse** |
+| ③ Value retrieval / generation | Where does the value come from? | **Fabricated employer; invented degree name; invented "18%" resume metric; stale past date; blind salary reuse** |
 | ④ Actuation | Actually write values, click buttons | Fields skipped while flow proceeds |
 | ⑤ State verification | Confirm what was actually written/submitted | **All of failure mode #7** (false "100%", "Submit Now" over missing required fields) |
 

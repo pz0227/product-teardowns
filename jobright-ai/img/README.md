@@ -1,28 +1,27 @@
-# Redacted Evidence Images: Status and Checklist
+# Redacted Evidence Images
 
-**No screenshots are published yet.** The raw archive (20 images) contains personal information (name, email, phone, GPA, application identifiers) and is kept out of git by policy. This checklist tracks which images are queued for manual redaction and publication. An image appears in this folder only after every item in the redaction standard passes.
+Seven redacted screenshots from my own logged usage, published as the visual evidence behind the [teardown](../teardown.md). Raw originals stay out of git by policy; these copies passed a manual redaction pass plus a verification review before publishing.
 
-## Redaction standard (all must hold before publishing)
+## Redaction standard (all must hold)
 
-1. Name, email address, phone number, GPA, and any application/account identifiers removed or masked.
-2. Any third-party personal information (recruiter names, referrer names) removed.
-3. The screenshot remains understandable after redaction (the failure is still visible).
-4. The image is linked from a specific evidence-index entry (JR-nn).
-5. The caption states what the reader should notice, in one sentence.
+1. Name, email, phone, GPA, and any account or application identifiers removed.
+2. Third-party personal information removed; company names blacked out where they identify a specific application.
+3. The failure remains visible and understandable after redaction.
+4. Each image is linked from a specific [evidence-index](../evidence-index.md) entry.
+5. A caption states what the reader should notice.
 
-## Publication queue (priority order, by evidentiary value)
+## Published images
 
-| Priority | Evidence ID | File (local archive) | What it shows | What needs redaction |
-|---|---|---|---|---|
-| 1 | JR-13 | `put_old_salary_range_for_new_postion_crazy_number.png` | The 6500095000 concatenated salary | Applicant identity fields, company identifiers |
-| 2 | JR-20 | `not_filling_most_basic_material(resume).png` | "Submit Now" claimed over a missing required resume | Identity fields, ATS account info |
-| 3 | JR-09 | `wrong_info_about_last_employment_info.png` | Fabricated employer in "Latest Employer" | Identity fields; keep the fabricated value visible |
-| 4 | JR-08 | `resume_make_up_with_quantified_results.png` | Invented "18%" quantified resume claim | All real resume content except the fabricated bullet |
-| 5 | JR-16 | `can_not_finish_auto_fill_with_even_simply_fields.png` | "5/5 complete" vs. ATS flagging missing email/phone | Email/phone values themselves, identity fields |
-| 6 | JR-25 | `autofill_not_avalable.png` | "W-2 only, no sponsorship" posting served to a sponsorship-requiring profile | Profile panel identity details |
+| Evidence ID | File | What to notice |
+|---|---|---|
+| [JR-09](../evidence-index.md) | `wrong_info_about_last_employment_info.png` | "Name of Latest Employer" autofilled with a consulting firm I have never worked at. An identity-level fact, generated rather than read from my profile. |
+| [JR-13](../evidence-index.md) | `put_old_salary_range_for_new_postion_crazy_number.png` | Total compensation expectation filled as **6500095000**: my saved 65000 to 95000 range concatenated into a single ~$6.5B figure. Field-format blindness on top of blind value reuse. |
+| [JR-08](../evidence-index.md) | `resume_make_up_with_quantified_results.png` | Highlighted text is generated content that is not in my canonical resume, including an invented metric ("improving MVP release timelines by 18%"). This version was submitted before I could review it. |
+| [JR-14](../evidence-index.md) | `aigc_is_wrong.png` | The form instructs: `If "Yes", type Yes`. The agent typed "relocating". The field was not understood, and the answer it produced is ambiguous to a recruiter. |
+| [JR-20](../evidence-index.md) | `submit-now-over-missing-resume.png` | Left panel: "11/11 required fields filled. Form complete, click Submit Now." Right panel, at the same moment: the site itself flags a missing required **Resume**. The agent invites submission of an application with no resume attached. |
+| [JR-16](../evidence-index.md) | `can_not_finish_auto_fill_with_even_simply_fields.png` | Same pattern, different site: "5/5 required fields filled. Form complete" while the site flags missing required Email and Phone. Execution state is self-reported, not verified. |
+| [JR-25](../evidence-index.md) | `autofill_not_avalable.png` | Two findings in one capture: the posting states "W-2 candidates only, H-1B sponsorship not available" yet was served to a profile that requires future sponsorship, and the panel reports "Autofill Not Supported" on this site. |
 
-Remaining images stay in the local archive until these six are published and the process is proven.
+## Why these seven
 
-## Why not publish everything at once
-
-Each image needs a manual redaction pass and a caption that earns its place. Six images cover every major failure class in the taxonomy (value fabrication, critical-fact error, execution-state misreporting, constraint violation); more adds volume, not proof.
+They cover every failure class in the taxonomy: value fabrication (JR-08, JR-09), context-blind field interpretation (JR-13, JR-14), execution-state misreporting (JR-16, JR-20), and recommendation constraint violation (JR-25). The remaining images in my local archive repeat these classes; more would add volume, not proof.

@@ -33,12 +33,12 @@ Checked Jobright's application history per the 07-09 verification item: the **Ap
 
 **Context annotations (2026-07-09, Polly):**
 - The fabricated tailored resumes (batch A) **were submitted to real jobs**, in many flows the agent completed submission before the user could intervene. Polly could not reconstruct from memory which version went where. **⚠️ To verify: Jobright does have an application-history feature, check whether it preserves the exact submitted resume version and free-text answers per application, or only the fact that an application was sent. The P1 critique stands only to the extent the former is missing.**
-- For several incidents (e.g., the BCG employer error, the ClassDojo submit prompt) Polly **cannot reconstruct the context**, which application, whether it shipped. At 30+ applications/day this is expected, and it is itself evidence for the P1 application-memory recommendation: *without an application record, even the user's own incidents are untraceable.*
+- For several incidents (e.g., the fabricated-employer error, the ClassDojo submit prompt) Polly **cannot reconstruct the context**, which application, whether it shipped. At 30+ applications/day this is expected, and it is itself evidence for the P1 application-memory recommendation: *without an application record, even the user's own incidents are untraceable.*
 - Sponsorship-violating recommendations (batch E): roughly 1–2 observed in the past week, real but low-frequency.
 - Prevalence framing: 19 screenshots captured across 2026-07-08/09, most during the 07-09 batch of 30+ applications. Capture was opportunistic (worst moments screenshotted), so this is **incident documentation, not a rate estimate**, rates come from the random-audit sampling plan above.
 
 **B. Critical fact errors (application forms)**
-- `wrong_info_about_last_employment_info.png`, "Name of Latest Employer" autofilled as "Boston Consulting Group (BCG)." Never worked there.
+- `wrong_info_about_last_employment_info.png`, "Name of Latest Employer" autofilled with a major consulting firm. Never worked there.
 - `wrong_info_miss_info.png`, education mapped as "Agricultural Business Technoiogy [sic], University of Pennsylvania" (actual: M.S.Ed in Statistics, Measurement, Assessment & Research Technology). UL Solutions application.
 - `use_some_very_old_days_past_month.png`, "How soon are you available to start?" → "2026-06-26," a date already in the past at fill time.
 - `salary_range_not_adjusted_same_as_last_time.png`, Salary Range filled "70000 to 70000": degenerate range, reused last-typed figure.
