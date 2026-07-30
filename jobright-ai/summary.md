@@ -8,7 +8,7 @@ Jobright.ai is an AI job-search agent: it recommends jobs, tailors your resume p
 
 ## Research context
 
-I am a paying Turbo user in an active job search: 350+ applications submitted through and alongside the product, 30+ on peak days. Usage was logged daily with dated entries and screenshots (personal data redacted before anything publishes). I am a constraint-heavy user (work authorization, salary floor), which §10 of the full teardown flags as a bias to check, not hide.
+I am a paying Turbo user in an active job search: 350+ applications submitted through and alongside the product, 30+ on peak days, logged daily with dated entries and screenshots. I am a constraint-heavy user (work authorization, salary floor), which shapes which failures I feel most sharply.
 
 ## Three strongest pieces of evidence
 
@@ -18,7 +18,7 @@ I am a paying Turbo user in an active job search: 350+ applications submitted th
 
 ## The signature insight
 
-**Value is front-loaded; trust cost is back-loaded, and the submit button is the trust boundary.** Before submission an error is a draft problem; after it, the error is me. Every logged failure is invisible to the metric the product appears to optimize (inference, argued from product behavior: applications sent), because the application still goes out and the counter still increments. The metric explains the failure pattern.
+**Value is front-loaded; trust cost is back-loaded, and the submit button is the trust boundary.** Before submission an error is a draft problem; after it, the error is me. Every logged failure is invisible to the metric the product appears to optimize (inference: applications sent), because the application still goes out and the counter still increments. The metric explains the failure pattern.
 
 ## Proposed north star
 

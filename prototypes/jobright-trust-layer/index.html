@@ -27,10 +27,10 @@
 
     <div class="card">
       <h2>Critical facts <span class="hint">read, never generated</span></h2>
-      <p class="explain">High-risk identity facts may only come from the canonical profile, a saved user policy, or explicit confirmation. When a value is missing, the agent stops and asks. It never guesses something plausible.</p>
+      <p class="explain">High-risk identity facts may only come from the canonical profile, a saved user policy, or explicit confirmation. When a value is missing, the agent stops and asks. It never guesses something plausible. Provenance is recorded per field, and confirming a value never relabels it as verified.</p>
       <table class="facts" id="factsTable" aria-label="Critical facts with provenance">
         <thead>
-          <tr><th>Field</th><th>Value</th><th>Source</th><th>Confidence</th><th>Generation allowed?</th></tr>
+          <tr><th>Field</th><th>Value</th><th>Provenance</th><th>Generation allowed?</th></tr>
         </thead>
         <tbody><!-- rendered by script.js --></tbody>
       </table>
@@ -62,6 +62,7 @@
       <h2>Trusted Qualified Application?</h2>
       <div id="tqaVerdict" class="tqa-verdict no">Not yet</div>
       <ul id="tqaReasons" class="tqa-reasons"></ul>
+      <p id="tqaFootnote" class="explain small"></p>
       <p class="explain small">TQA = qualified against saved constraints + every critical fact read from verified sources + submission verifiably completed + every material change reviewed. Defined in the <a href="../../jobright-ai/teardown.md">teardown</a>, §4.</p>
     </div>
 

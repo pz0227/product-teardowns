@@ -1,6 +1,6 @@
 # Claude Code in 3 Minutes
 
-> **Evidence maturity: early pattern hypothesis.** Four documented incidents from one month of daily paid usage, logging ongoing. This is a developing analysis, deliberately published early with its uncertainty labeled, not a concluded case. Four incidents are enough to form a hypothesis; they are not market proof of anything.
+> **Evidence maturity: early pattern hypothesis.** Four documented incidents from one month of daily paid usage, logging ongoing. Enough to form a hypothesis, not to prove a pattern. Published early on purpose, with the uncertainty on the label rather than buried in a footnote.
 
 ## The product and the problem
 
@@ -8,7 +8,7 @@ Claude Code is an agentic AI assistant that started as a coding tool and is beco
 
 ## Research context
 
-Daily paid use for real work (software projects, research, writing, planning) across all three surfaces, including unusually long multi-day sessions. That usage pattern is a power-user tail, which the full teardown's self-critique flags: typical users may never hit the boundaries I hit.
+Daily paid use for real work (software projects, research, writing, planning) across all three surfaces, including unusually long multi-day sessions. That is a power-user pattern, and typical users may never hit the boundaries I hit.
 
 ## The four documented incidents
 
@@ -34,7 +34,7 @@ All dated, in the [evidence log](./evidence-log.md):
 
 ## What I would validate next
 
-Frequency, before anything else: how often does compaction actually drop something that matters, and for whom? The full teardown commits to logging delights as well as failures, to counter grudge-logging bias, and treats the retention paradox (a dissatisfied user who keeps paying, including me) as data.
+Frequency, before anything else: how often does compaction actually drop something that matters, and for whom? The log also records what the product does well, so the evidence base does not become a grievance file, and treats the retention paradox (a dissatisfied user who keeps paying, including me) as data worth explaining.
 
 ## Go deeper
 

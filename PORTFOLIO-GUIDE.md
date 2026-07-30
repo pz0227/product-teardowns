@@ -29,8 +29,6 @@ That's enough to know what I did and how I think.
 | Diagnosis to requirements | [Prototype](./prototypes/jobright-trust-layer/): policy, interaction logic, and edge cases in working form |
 | Intellectual honesty | Steelman and self-falsification sections in both teardowns; epistemic labels; maturity labels |
 
-Not demonstrated in this repository: stakeholder management, engineering team leadership, shipped business outcomes. This is independent research and concept work, and it claims exactly that.
-
 ## Strongest interview discussion topics
 
 1. **The trust boundary:** why the submit button converts a draft problem into the user's problem, and how that reframes agent UX.

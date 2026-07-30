@@ -12,7 +12,9 @@ Mixing recommendation quality with execution quality produces mush. They are dif
 
 - **Metric:** constraint violation rate in the recommendation feed (violations / recommendations sampled).
 - **Procedure:** sample the top N feed recommendations at a fixed time daily; judge each against the user's saved constraints (role type, seniority, employment type, salary floor, sponsorship). Record verdict and reason per item.
-- **The existing 43% figure (JR-01)** belongs to this funnel: a documented 7-item sample with stated criteria. It is a **calculated point estimate from one small sample**, not a stable rate; the procedure above is how it becomes one.
+- **The existing 43% figure (JR-01)** belongs to this funnel: a documented 7-item sample with stated criteria. It is a calculated point estimate, and the honest way to state its precision is an interval rather than a caveat. For 3 of 7, the **95% Wilson score interval is 16% to 75%**.
+
+  That interval is the real finding. It rules out a feed that is nearly always right, and it rules out nothing else. Any product decision that depends on whether the true rate is 20% or 70% cannot be made from this sample, which is precisely why the sampling procedure above exists. Getting the interval down to roughly ±10 points would take on the order of 100 sampled recommendations, a week of disciplined logging rather than a research program.
 
 ### Funnel 2: application execution quality
 

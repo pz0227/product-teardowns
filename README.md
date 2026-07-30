@@ -12,7 +12,7 @@ Deeper: the [full Jobright teardown](./jobright-ai/teardown.md) (10 sections) an
 
 ## The flagship case in four sentences
 
-I pay for Jobright.ai, an AI agent that applies to jobs for me, and logged my usage across 350+ real applications. I documented 20+ incidents where the agent misrepresented me: a fabricated employer, an invented resume metric, a $6.5B salary expectation, a status panel claiming "form complete" over an empty resume field. Every one of these failures is invisible to the metric the product appears to optimize, applications sent: the counter increments, the dashboard looks healthy, and the cost lands weeks later in an interview where no dashboard is looking. So I designed the replacement north star (Trusted Qualified Applications), attributed every failure to its pipeline stage to show why better parsing wouldn't fix the worst ones, and prototyped the trust layer I'd build instead.
+I pay for Jobright.ai, an AI agent that applies to jobs for me, and logged my usage across 350+ real applications. I documented 20+ trust and execution failures, including incidents where the agent misrepresented me: a fabricated employer, an invented resume metric, a $6.5B salary expectation, and a status panel claiming "form complete" over an empty resume field. Every one of these failures is invisible to the metric the product appears to optimize, applications sent: the counter increments, the dashboard looks healthy, and the cost lands weeks later in an interview where no dashboard is looking. So I designed the replacement north star (Trusted Qualified Applications), attributed every failure to its pipeline stage to show why better parsing wouldn't fix the worst ones, and prototyped the trust layer I'd build instead.
 
 ## Selected evidence
 

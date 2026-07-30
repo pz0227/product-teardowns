@@ -1,43 +1,51 @@
 /* Trust Layer prototype. All data fictional (persona: Jordan Lee).
-   Demonstrates: provenance table, read-never-generated pauses, resume diff
-   review, a submission trust gate, and a live TQA verdict. No storage, no
-   network, no real submission. */
+   Demonstrates: a provenance state model, read-never-generated pauses, resume
+   diff review, a submission trust gate, and a live TQA verdict.
+   No storage, no network, no real submission.
+
+   v2 change (see README changelog): approval and groundedness are separate
+   dimensions. Confirming or editing a claim makes it AUTHORIZED, never
+   EVIDENCE-BACKED. The state model below enforces that distinction, and
+   submission is never self-verified by the agent. */
 "use strict";
+
+/* ---------------- provenance model ----------------
+   Ordered roughly by how much independent support exists behind a value. */
+const PROV = {
+  PROFILE:   { id: "profile",   label: "Profile-verified",  cls: "ok",   trusted: true  },
+  EVIDENCE:  { id: "evidence",  label: "Evidence-backed",   cls: "ok",   trusted: true  },
+  POLICY:    { id: "policy",    label: "Policy-derived",    cls: "ok",   trusted: true  },
+  ASSERTED:  { id: "asserted",  label: "User-asserted",     cls: "warn", trusted: false },
+  GENERATED: { id: "generated", label: "Model-generated",   cls: "bad",  trusted: false },
+  NONE:      { id: "none",      label: "Unsupported",       cls: "bad",  trusted: false },
+};
 
 /* ---------------- state ---------------- */
 
 const facts = [
+  { id: "employer", label: "Latest employer", value: "Brightfield Media (fictional)",
+    prov: PROV.PROFILE, genAllowed: false },
+  { id: "education", label: "Education", value: "B.A. Economics, Lakeview University (fictional)",
+    prov: PROV.PROFILE, genAllowed: false },
+  { id: "workauth", label: "Work authorization", value: "Authorized; will require sponsorship in the future",
+    prov: PROV.PROFILE, genAllowed: false },
   {
-    id: "employer", label: "Latest employer", value: "Brightfield Media (fictional)",
-    source: "Canonical profile", confidence: "verified", genAllowed: false,
-  },
-  {
-    id: "education", label: "Education", value: "B.A. Economics, Lakeview University (fictional)",
-    source: "Canonical profile", confidence: "verified", genAllowed: false,
-  },
-  {
-    id: "workauth", label: "Work authorization", value: "Authorized; will require sponsorship in the future",
-    source: "Canonical profile", confidence: "verified", genAllowed: false,
-  },
-  {
-    id: "referral", label: "Referral", value: null,
-    source: null, confidence: "missing", genAllowed: false,
+    id: "referral", label: "Referral", value: null, prov: PROV.NONE, genAllowed: false,
     ask: {
       text: "This application asks whether you have a referral. There is nothing in your profile. The agent will not invent one.",
       options: [
-        { label: "No referral", value: "No", source: "Explicit user confirmation" },
-        { label: "Yes, I have one (type name)", prompt: true, source: "Explicit user confirmation" },
+        { label: "No referral", value: "No", prov: PROV.ASSERTED },
+        { label: "Yes, I have one (type name)", prompt: true, prov: PROV.ASSERTED },
       ],
     },
   },
   {
-    id: "salary", label: "Expected salary", value: null,
-    source: null, confidence: "missing", genAllowed: false,
+    id: "salary", label: "Expected salary", value: null, prov: PROV.NONE, genAllowed: false,
     ask: {
       text: "The posting states $70,000 to $85,000 per year (annual unit detected). Your saved policy: 'prefer the JD midpoint when a range is posted.' Proposed answer: $77,500 / year.",
       options: [
-        { label: "Use $77,500 / year", value: "$77,500 / year", source: "Saved policy + JD range" },
-        { label: "Enter a different amount", prompt: true, source: "Explicit user confirmation" },
+        { label: "Use $77,500 / year", value: "$77,500 / year", prov: PROV.POLICY },
+        { label: "Enter a different amount", prompt: true, prov: PROV.ASSERTED },
       ],
     },
   },
@@ -50,7 +58,7 @@ const diffs = [
     after: "Analyzed subscriber churn across 12 cohorts and presented a retention playbook adopted by the growth team.",
     why: "Match JD keyword 'retention strategy'.",
     sourceNote: "Cohort count and 'adopted playbook' are NOT in the canonical profile.",
-    grounded: false, status: "pending",
+    prov: PROV.GENERATED, status: "pending", ack: false,
   },
   {
     id: "d2", target: "Skills section",
@@ -58,38 +66,30 @@ const diffs = [
     after: "SQL, Excel, Tableau, A/B testing.",
     why: "JD lists experiment experience.",
     sourceNote: "A/B testing appears in profile project 'Pricing page test, 2025'.",
-    grounded: true, status: "pending",
+    prov: PROV.EVIDENCE, status: "pending", ack: false,
   },
 ];
 
-let submitted = false;
+/* Submission is a three-state machine. The agent can reach "attempted";
+   only an external signal can reach "verified". That asymmetry is the
+   whole point of failure mode #7 in the teardown. */
+let submission = "not_attempted"; // not_attempted | attempted | verified | failed
 
 /* ---------------- rendering ---------------- */
 
 const $ = (sel) => document.querySelector(sel);
-
-function badge(text, cls) { return `<span class="badge ${cls}">${text}</span>`; }
+const badge = (text, cls) => `<span class="badge ${cls}">${text}</span>`;
 
 function renderFacts() {
-  const rows = facts.map((f) => {
-    const val = f.value
-      ? f.value
-      : `<span class="missing">Missing, agent paused</span>`;
-    const conf = f.confidence === "verified"
-      ? badge("verified", "ok")
-      : f.confidence === "confirmed"
-        ? badge("user-confirmed", "ok")
-        : badge("needs input", "warn");
-    const gen = f.genAllowed ? badge("allowed", "neutral") : badge("never", "bad");
+  $("#factsTable tbody").innerHTML = facts.map((f) => {
+    const val = f.value ? f.value : `<span class="missing">Missing, agent paused</span>`;
     return `<tr>
       <td><strong>${f.label}</strong></td>
       <td>${val}</td>
-      <td class="src">${f.source ?? "None"}</td>
-      <td>${conf}</td>
-      <td>${gen}</td>
+      <td>${badge(f.prov.label, f.prov.cls)}</td>
+      <td>${f.genAllowed ? badge("allowed", "neutral") : badge("never", "bad")}</td>
     </tr>`;
   }).join("");
-  $("#factsTable tbody").innerHTML = rows;
 }
 
 function renderPause() {
@@ -111,8 +111,7 @@ function renderPause() {
         if (!v) return;
       }
       pending.value = v;
-      pending.source = opt.source;
-      pending.confidence = "confirmed";
+      pending.prov = opt.prov;
       update();
     };
     actions.appendChild(b);
@@ -123,9 +122,7 @@ function renderDiffs() {
   $("#diffList").innerHTML = diffs.map((d) => {
     const statusCls = d.status === "pending" ? "pending" : `resolved-${d.status}`;
     const statusTxt = { pending: "NEEDS REVIEW", approved: "APPROVED", rejected: "REJECTED" }[d.status];
-    const grounded = d.grounded
-      ? badge("grounded in profile", "ok")
-      : badge("ungrounded content", "bad");
+    const risky = d.status === "approved" && !d.prov.trusted;
     const actions = d.status === "pending"
       ? `<div class="diff-actions">
            <button data-act="approve" data-id="${d.id}">Approve</button>
@@ -133,27 +130,48 @@ function renderDiffs() {
            <button data-act="reject" data-id="${d.id}">Reject</button>
          </div>`
       : "";
+    const warn = risky && !d.ack
+      ? `<div class="ack">
+           <strong>Approved, but still not evidence-backed.</strong> Confirming a claim
+           authorizes it; it does not create evidence for it. This content will be
+           submitted under your name and recorded as <em>${d.prov.label.toLowerCase()}</em>.
+           <div class="diff-actions">
+             <button data-act="ack" data-id="${d.id}">I understand, submit it anyway</button>
+             <button data-act="reject" data-id="${d.id}">Actually, revert it</button>
+           </div>
+         </div>`
+      : risky && d.ack
+        ? `<div class="acked">Acknowledged: submitting as ${d.prov.label.toLowerCase()}, not as verified content.</div>`
+        : "";
     return `<div class="diff-card ${statusCls}">
       <div class="diff-head"><strong>${d.target}</strong>
         <span class="diff-status ${d.status}">${statusTxt}</span></div>
       <div class="diff-block before">${d.before}</div>
       <div class="diff-block after">${d.after}</div>
-      <div class="diff-meta"><span class="why">Why: ${d.why}</span><br>Source check: ${d.sourceNote} ${grounded}</div>
-      ${actions}
+      <div class="diff-meta"><span class="why">Why: ${d.why}</span><br>
+        Source check: ${d.sourceNote} ${badge(d.prov.label, d.prov.cls)}</div>
+      ${actions}${warn}
     </div>`;
   }).join("");
 
   document.querySelectorAll(".diff-actions button").forEach((b) => {
     b.onclick = () => {
       const d = diffs.find((x) => x.id === b.dataset.id);
-      const act = b.dataset.act;
-      if (act === "approve") d.status = "approved";
-      if (act === "reject") { d.status = "rejected"; d.after = d.before; }
-      if (act === "edit") {
-        const v = window.prompt("Edit the proposed text (demo only):", d.after);
-        if (v === null) return;
-        d.after = v; d.status = "approved"; d.grounded = true;
-        d.sourceNote = "User-edited text (explicit confirmation).";
+      switch (b.dataset.act) {
+        case "approve": d.status = "approved"; break;
+        case "reject":  d.status = "rejected"; d.after = d.before; d.prov = PROV.PROFILE; d.ack = false; break;
+        case "ack":     d.ack = true; break;
+        case "edit": {
+          const v = window.prompt("Edit the proposed text (demo only):", d.after);
+          if (v === null) return;
+          d.after = v;
+          d.status = "approved";
+          // Editing changes WHO asserted the claim, not whether evidence exists.
+          d.prov = PROV.ASSERTED;
+          d.sourceNote = "User-written text. No independent evidence in the profile.";
+          d.ack = false;
+          break;
+        }
       }
       update();
     };
@@ -165,53 +183,69 @@ function renderDiffs() {
 function gateItems() {
   const factsDone = facts.every((f) => f.value);
   const diffsDone = diffs.every((d) => d.status !== "pending");
-  const ungroundedApproved = diffs.some((d) => d.status === "approved" && !d.grounded);
+  const riskyUnacked = diffs.some((d) => d.status === "approved" && !d.prov.trusted && !d.ack);
   return [
     { label: "All critical fields sourced (profile / policy / confirmation)", done: factsDone },
     { label: "Work-authorization answer verified against profile", done: true },
     { label: "Salary unit checked against posting (annual)", done: !!facts.find((f) => f.id === "salary").value },
     { label: "Resume attached: Jordan_Lee_Resume_v3.pdf (fictional)", done: true },
     { label: "All material resume changes reviewed", done: diffsDone },
-    { label: "No unreviewed ungrounded content", done: !ungroundedApproved && diffsDone },
-    { label: "Submission will be verified against the site's own state", done: submitted, future: !submitted },
+    { label: "Non-evidence-backed content explicitly acknowledged", done: !riskyUnacked },
   ];
 }
 
 function renderGate() {
   const items = gateItems();
-  $("#gateList").innerHTML = items.map((it) => {
-    const ico = it.done ? "✅" : it.future ? "⏳" : "🔲";
-    const cls = it.done ? "done" : "todo";
-    return `<li><span class="gate-ico">${ico}</span><span class="${cls}">${it.label}</span></li>`;
-  }).join("");
+  $("#gateList").innerHTML = items.map((it) =>
+    `<li><span class="gate-ico">${it.done ? "✅" : "🔲"}</span>
+     <span class="${it.done ? "done" : "todo"}">${it.label}</span></li>`).join("");
 
-  const blockers = items.filter((it) => !it.done && !it.future);
+  const blockers = items.filter((it) => !it.done);
   const btn = $("#submitBtn");
-  btn.disabled = blockers.length > 0 || submitted;
-  btn.textContent = submitted ? "Submitted (demo)" : "Submit application";
-  $("#gateNote").textContent = submitted
-    ? "Demo complete. In a real product, completion state would be read from the application site's own validation, never self-reported."
-    : blockers.length
+  btn.disabled = blockers.length > 0 || submission !== "not_attempted";
+  btn.textContent = {
+    not_attempted: "Submit application",
+    attempted: "Submitted, awaiting site confirmation…",
+    verified: "Submission confirmed by site",
+    failed: "Site reported the submission incomplete",
+  }[submission];
+
+  $("#gateNote").innerHTML = {
+    not_attempted: blockers.length
       ? `Blocked on: ${blockers.map((b) => b.label.toLowerCase()).join("; ")}.`
-      : "All critical items verified. Submission unlocked.";
+      : "Every pre-submission item is verified. Submission unlocked.",
+    attempted: "The agent has attempted submission. <strong>It cannot confirm the result itself.</strong> Waiting for the application site's own state.",
+    verified: "The application site confirmed receipt. Only an external signal can close this loop.",
+    failed: "The site reported the submission did not complete. The agent's own view said otherwise, which is exactly why self-reported state is never trusted here.",
+  }[submission];
 }
 
 function renderTQA() {
   const factsOk = facts.every((f) => f.value);
   const diffsOk = diffs.every((d) => d.status !== "pending") &&
-                  !diffs.some((d) => d.status === "approved" && !d.grounded);
+                  !diffs.some((d) => d.status === "approved" && !d.prov.trusted && !d.ack);
   const conditions = [
     { label: "Qualified: matches saved constraints (role, location policy, salary floor)", ok: true },
-    { label: "Factually grounded: critical facts read from verified sources", ok: factsOk },
-    { label: "Submission verified", ok: submitted },
-    { label: "Interview-ready: every change reviewed and explainable", ok: diffsOk },
+    { label: "Factually grounded: critical facts sourced, nothing model-generated", ok: factsOk },
+    { label: "Submission verified by the site, not by the agent", ok: submission === "verified" },
+    { label: "Interview-ready: every change reviewed, provenance recorded", ok: diffsOk },
   ];
   $("#tqaReasons").innerHTML = conditions
-    .map((c) => `<li>${c.ok ? "✅" : "❌"} ${c.label}</li>`).join("");
+    .map((c) => `<li>${c.ok ? "✅" : submission === "attempted" && c.label.startsWith("Submission") ? "⏳" : "❌"} ${c.label}</li>`)
+    .join("");
+
   const all = conditions.every((c) => c.ok);
+  const pendingExternal = conditions.slice(0, 2).concat(conditions[3]).every((c) => c.ok) &&
+                          submission !== "verified";
   const v = $("#tqaVerdict");
-  v.textContent = all ? "Yes: this counts" : "Not yet";
-  v.className = `tqa-verdict ${all ? "yes" : "no"}`;
+  if (all) { v.textContent = "Yes: this counts"; v.className = "tqa-verdict yes"; }
+  else if (pendingExternal) { v.textContent = "Eligible: external verification pending"; v.className = "tqa-verdict pending"; }
+  else { v.textContent = "Not yet"; v.className = "tqa-verdict no"; }
+
+  const asserted = diffs.filter((d) => d.status === "approved" && d.prov === PROV.ASSERTED).length;
+  $("#tqaFootnote").textContent = asserted
+    ? `Note: ${asserted} approved change is recorded as user-asserted rather than evidence-backed. It passes the gate because you acknowledged it, and the record says so.`
+    : "";
 }
 
 /* ---------------- glue ---------------- */
@@ -220,21 +254,17 @@ function toast(msg) {
   const t = $("#toast");
   t.textContent = msg;
   t.hidden = false;
-  setTimeout(() => { t.hidden = true; }, 3200);
+  setTimeout(() => { t.hidden = true; }, 4000);
 }
 
-function update() {
-  renderFacts();
-  renderPause();
-  renderDiffs();
-  renderGate();
-  renderTQA();
-}
+function update() { renderFacts(); renderPause(); renderDiffs(); renderGate(); renderTQA(); }
 
 $("#submitBtn").addEventListener("click", () => {
-  submitted = true;
-  toast("Concept demo: nothing was actually submitted anywhere.");
+  submission = "attempted";
   update();
+  toast("Concept demo: nothing was submitted anywhere. Simulating the site's own confirmation…");
+  // The agent cannot mark its own work verified. A separate external signal does.
+  setTimeout(() => { submission = "verified"; update(); }, 2600);
 });
 
 update();

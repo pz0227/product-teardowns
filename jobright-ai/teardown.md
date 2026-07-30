@@ -6,7 +6,7 @@
 
 ## TL;DR
 
-Jobright is an AI job-search agent I pay for and use every day. It is genuinely fast, which is why I pay. But across 350+ real applications I logged 20+ documented failures where the agent misrepresented me: a fabricated employer, an invented "18%" resume metric, a $6,500,095,000 salary expectation, and a status panel claiming "form complete, submit now" while the resume field sat empty.
+Jobright is an AI job-search agent I pay for and use every day. It is genuinely fast, which is why I pay. But across 350+ real applications I logged 20+ documented trust and execution failures, including cases where the agent misrepresented me: a fabricated employer, an invented "18%" resume metric, a $6,500,095,000 salary expectation, and a status panel claiming "form complete, submit now" while the resume field sat empty.
 
 ![Agent panel reporting "11/11 required fields filled. Form complete, click Submit Now" while the application site simultaneously flags a missing required Resume field](./img/submit-now-over-missing-resume.png)
 *The failure in one frame: the agent reports the form complete and invites submission, while the site itself flags the missing required resume. Redacted screenshot, [JR-20](./evidence-index.md); six more in [`img/`](./img/README.md).*
@@ -251,18 +251,30 @@ This also positions Jobright for the agent ecosystem: users' own AI assistants (
 
 An earlier draft of this section used numeric RICE scores. I replaced it: precise reach percentages and person-month estimates imply knowledge of Jobright's user base and architecture that an external user does not have. Bands preserve the decision logic without the false precision. **Effort is the least knowable column from outside and is labeled accordingly.**
 
-| Fix | Reach | Impact | Evidence strength | Est. effort | Reversibility | Decision |
-|---|---|---|---|---|---|---|
-| P0 Read-never-generated for critical facts | High (every applicant has identity fields) | Critical (removes the catastrophic tail) | Strong: 9 verified incidents (JR-07..15) | Unknown, likely Medium (policy + profile plumbing) | Moderate (threshold tunable, rollback clean) | **Now** |
-| Execution honesty (ATS-verified state) | High (every autofill flow) | High (protects users from every other failure class) | Strong: 6 verified incidents (JR-16..21) | Unknown (depends on per-ATS validation access) | Easy (display-layer first) | **Now** |
-| Resume diff + confirmation gate | Medium (agent-mode users) | High (interview harm is the back-loaded cost) | Strong: JR-05, JR-26; partially shipped (JR-27) | Medium (assumed: versioning exists per JR-27) | Easy | **Next** |
-| Salary intelligence | Medium (salary fields are common, not universal) | Medium (visible, embarrassing, but narrower) | Strong: JR-12, JR-13 | Small (assumed: parsing + rules) | Easy | **Next** |
-| Grounded writing (evidence bank) | High (all generated content) | Medium (diffuse) | Directional: JR-05 plus my qualitative read | Large (new user-facing system) | Moderate | **Validate first** (how would users maintain a bank?) |
-| Agent-as-API / MCP server | Low initially | High (strategic position) | Weak (my inference about the agent ecosystem) | Large | Difficult (public contracts) | **Later** |
+Two columns most prioritization tables collapse are kept apart here. **Surface exposure** is how many users encounter the workflow at all; **failure prevalence** is how often it actually goes wrong. I know the first from the product's design and the second not at all, and pretending otherwise is how a confident-looking table smuggles in a number nobody measured. Evidence is split the same way: nine documented incidents are strong evidence that a failure class *exists* and say nothing about how *common* it is.
 
-**What first and why:** P0 and execution honesty together, because they attack the two red pipeline stages (③ value generation, ⑤ state verification) that carry every catastrophic incident, and both are policy/display changes before they are ML changes.
-**The assumption that could change the decision:** prevalence. If random audits (see [audit method](./audit-method.md)) showed critical-field errors on well under 1% of applications, the P0 drops below execution honesty, which stays justified at any error rate because false success claims are harmful even when rare.
-**What needs validation before engineering commitment:** the pause-rate tradeoff (§10.3): a trust gate that interrupts too often destroys the speed users pay for. The [validation plan](./validation-plan.md) specifies the experiment.
+| Fix | Surface exposure | Failure prevalence | Severity when triggered | Mechanism evidence | Prevalence evidence | Implementation uncertainty | Next decision |
+|---|---|---|---|---|---|---|---|
+| P0 Read-never-generated for critical facts | High (identity fields appear in nearly every application) | **Unknown** | Critical (a wrong employer or authorization answer can disqualify) | Strong (9 documented incidents, JR-07..15) | **None** (opportunistic capture) | High (profile plumbing, confidence thresholds) | **Instrument now, usability-test now, pilot only if baseline crosses threshold** |
+| Execution honesty (site-verified state) | High (every autofill flow) | Unknown, but the mechanism is systemic | High (a false completion claim invites submitting anything) | Strong (6 documented incidents, JR-16..21) | None | High (needs per-ATS validation access) | **Feasibility spike now; ship to a cohort if validation access exists** |
+| Resume diff + confirmation gate | Medium (agent-mode users) | Unknown | High (interview harm is the back-loaded cost) | Strong (JR-05, JR-26); partially shipped (JR-27) | None | Medium (versioning appears to exist per JR-27) | **Prototype-test now, build after threshold** |
+| Salary intelligence | Medium (salary fields are common, not universal) | Unknown, likely higher than identity errors | Medium (visible and embarrassing, rarely disqualifying) | Strong (JR-12, JR-13) | None | Low (parsing plus saved rules) | **Build after threshold** (cheap enough to bundle with P0 pilot) |
+| Grounded writing (evidence bank) | High (all generated content) | Unknown | Medium (diffuse) | Directional (JR-05 plus qualitative read) | None | High (a whole new user-facing system) | **Defer**, pending discovery on how users would maintain a bank |
+| Agent-as-API / MCP server | Low initially | Not applicable | High (strategic position) | Weak (my inference about the agent ecosystem) | None | High | **Defer** |
+
+**What I would do first, and why.** Instrument prevalence and usability-test the gate, because both are cheap and reversible, and both attack the two red pipeline stages (③ value generation, ⑤ state verification) that carry every catastrophic incident. Execution honesty is the one item defensible even at low prevalence: a false completion claim compounds every other failure, so it earns a feasibility spike immediately rather than waiting on a rate.
+
+**Sensitivity: how the decision changes with the number I don't have.** Illustrative scenarios, not estimates. Each row is a hypothesis about what instrumentation might find, paired with what I would then do.
+
+| If baseline shows | Critical-field error rate | Gate pause rate | Completion impact | Then |
+|---|---|---|---|---|
+| Low-risk world | ~0.1% | 8% | −6% | Do not ship the gate. Ship execution honesty; keep monitoring |
+| Tradeoff zone | ~1% | 2% | −1% | Limited-cohort pilot with a tuned confidence threshold |
+| High-risk world | ~5% | 1% | negligible | Ship the gate and expand |
+
+The decision hinges on one comparison: *prevented harm* (error rate × share prevented × severity) against *friction cost* (pause rate × interruption cost + completion loss). I cannot fill in those terms from outside, which is exactly why the first move is measurement rather than construction.
+
+**What would change the ranking:** if prevalence came in near zero, P0 drops behind execution honesty permanently. If the pause rate proved unavoidably high (say, the profile is sparse for most users), the gate becomes a paid-tier setting rather than a default. The [validation plan](./validation-plan.md) specifies the experiment and the falsification condition.
 
 ## 7. Competitive landscape: the delegation-trust spectrum
 
@@ -298,7 +310,15 @@ Framed honestly: this is **what I would propose to validate with the team**, not
 - *Risk:* instrumentation reveals the problem is smaller than my n=1 experience suggests. That is a good outcome; it redirects effort before code is written.
 - *Not building yet:* the gate itself, the evidence bank, anything user-facing.
 
-**Days 31-60 · Ship the two honest-by-design fixes to a cohort**
+**The branch at Day 30.** Phase two is conditional, because a plan that always proceeds to build regardless of what phase one found is not evidence-driven, it is a schedule wearing evidence as a costume.
+
+| What the baseline shows | Phase two becomes |
+|---|---|
+| Critical-field error rate crosses the agreed threshold | Pilot the P0 gate **and** execution honesty to a cohort (the path detailed below) |
+| Rate is well below threshold | Ship execution honesty only; keep P0 instrumented and revisit if the rate moves. A false completion claim is harmful even when errors are rare |
+| Per-ATS validation access proves technically unavailable | Ship honest uncertainty states instead ("this site's confirmation could not be read; verify manually") rather than claiming verified completion. The failure mode I am attacking is a confident false claim, and silence beats a wrong one |
+
+**Days 31-60 · Ship the two honest-by-design fixes to a cohort** (assuming the first branch)
 - *Objective:* remove the catastrophic tail (P0) and the false-success class (execution honesty) behind a flag.
 - *Key actions:* read-never-generated on the top five identity fields, partnered ATSs first so parsing noise doesn't confound it; completion state derived from ATS validation; a pre-submit block on unverified state; pause-and-ask UX for low-confidence fields.
 - *Involves:* product, design (the pause moment must resolve in one tap), engineering, support (incident intake).
