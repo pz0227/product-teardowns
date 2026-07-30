@@ -27,7 +27,7 @@ That's enough to know what I did and how I think.
 | Prioritization under uncertainty | [Banded prioritization](./jobright-ai/teardown.md#6-recommendations-prioritized) with named assumptions and validation gates |
 | Experiment design | [Validation plan](./jobright-ai/validation-plan.md) with guardrails, stopping criteria, and a falsification condition |
 | Diagnosis to requirements | [Prototype](./prototypes/jobright-trust-layer/): policy, interaction logic, and edge cases in working form, plus a [changelog](./prototypes/jobright-trust-layer/README.md) of two conceptual defects an external review exposed |
-| Working with engineering | [Instrumentation spec](./jobright-ai/instrumentation-spec.md): event schema, risk classes, and the SQL that measures the false-success rate |
+| Working with engineering | [Instrumentation spec](./jobright-ai/instrumentation-spec.md): event schema, field risk classes, and tested SQL that separates a verified failure from an unverifiable one |
 | Intellectual honesty | Steelman and self-falsification sections in both teardowns; epistemic labels; maturity labels |
 
 ## Strongest interview discussion topics

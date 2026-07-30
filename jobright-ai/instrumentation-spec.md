@@ -66,35 +66,109 @@ Two events, on purpose. One is the agent's claim; the other is the site's.
 ```
 submission_attempted
   application_id        string
+  attempted_at          timestamp
   ats_type              string      // greenhouse | workday | lever | unsupported | ...
   method                enum(partnered_adapter|ai_scan|easy_apply|assisted_manual)
   agent_reported_complete   bool    // what the status panel claimed
   required_fields_agent_count   int
+  required_critical_fields  array<string>  // identity/compensation fields this form
+                                           // requires, captured at parse time and
+                                           // carried here so coverage is computable
+  material_changes_count    int            // material resume changes the agent made
+                                           // for this application, so review coverage
+                                           // can be checked against a declared total
   gate_blocked          bool
   gate_block_reasons    array<string>
 
 submission_verified
   application_id        string
-  verification_source   enum(ats_confirmation|redirect_state|email_receipt|none_available)
+  verification_source   enum(ats_confirmation|redirect_state|email_receipt)
   verified              bool
   ats_reported_missing_fields   array<string>   // field types only, never values
   latency_from_attempt_ms       int
 ```
 
-The single most valuable query in this whole spec:
+`verification_source` has no `none_available` value. "No signal arrived" is the **absence** of this event, not a variant of it. Encoding absence as a row would let a missing verification masquerade as a verification.
+
+#### Three metrics, not one
+
+The tempting single metric ("false success rate") hides a distinction that matters operationally. There are two different bad outcomes after the agent claims completion:
+
+| Metric | Definition | What it means |
+|---|---|---|
+| **Verified failure rate** | Agent claimed complete, a verification event arrived within the window, and it said `verified = false` | The site actively contradicted the agent. This is a confirmed lie by the status panel |
+| **Missing verification rate** | Agent claimed complete, no verification event arrived within the window | Nobody knows. Could be a successful submission on a site we cannot read, or a silent failure |
+| **Unconfirmed success rate** | The sum of the two | Operational risk: applications the user believes are submitted and we cannot confirm. **Not** proof that all of them failed |
+
+Keeping them apart matters because the fixes differ: verified failures are a correctness bug in the agent, while missing verifications are a coverage gap in the verification integration. Reporting only the combined number would let a team "improve" the metric by adding verification coverage without fixing a single incorrect claim.
+
+**The verification window must be configured per method,** because the sources differ in latency. A partnered adapter confirms within seconds; an email receipt may take minutes. The values below are placeholders for a real calibration, and the choice is consequential: too short a window inflates the missing rate with confirmations that simply had not arrived yet.
 
 ```sql
--- How often does the agent claim success the site does not confirm?
-select count(*) filter (where a.agent_reported_complete and not v.verified)::float
-     / count(*) filter (where a.agent_reported_complete) as false_success_rate
-from submission_attempted a
-left join submission_verified v using (application_id);
+-- Dialect: PostgreSQL. Tested against SQLite 3.45 with equivalent fixtures;
+-- see the test cases listed after the query.
+with window_config(method, window_ms) as (
+  values ('partnered_adapter',  60000),
+         ('easy_apply',         60000),
+         ('ai_scan',           300000),
+         ('assisted_manual', 86400000)
+),
+attempts as (
+  select a.application_id, a.method, w.window_ms
+  from submission_attempted a
+  join window_config w on w.method = a.method
+  where a.agent_reported_complete
+    -- Exclude attempts whose window has not elapsed yet, otherwise "missing"
+    -- just means "recent" and the metric drifts with query time.
+    and a.attempted_at <= :as_of - make_interval(secs => w.window_ms / 1000.0)
+),
+ranked as (
+  -- One verdict per application. A retry can produce several verification
+  -- events; the latest one inside the window is the authoritative answer.
+  select v.application_id, v.verified,
+         row_number() over (partition by v.application_id
+                            order by v.latency_from_attempt_ms desc) as rn
+  from submission_verified v
+  join attempts a on a.application_id = v.application_id
+  where v.latency_from_attempt_ms <= a.window_ms
+),
+verdict as (select application_id, verified from ranked where rn = 1)
+select
+  count(*) as claimed_complete,
+  1.0 * count(*) filter (where d.verified = false)
+      / nullif(count(*), 0) as verified_failure_rate,
+  1.0 * count(*) filter (where d.application_id is null)
+      / nullif(count(*), 0) as missing_verification_rate,
+  1.0 * count(*) filter (where d.verified = false or d.application_id is null)
+      / nullif(count(*), 0) as unconfirmed_success_rate
+from attempts a
+left join verdict d on d.application_id = a.application_id;
 ```
 
-That is failure mode #7, expressed as a number. Nobody can act on "the status panel sometimes lies." Everybody can act on a false-success rate with a trend line.
+**Why the NULL handling is written this way.** The obvious version of this query (`left join ... where not v.verified`) is wrong, and wrong in the direction that hides the worst case. When no verification event exists, `v.verified` is `NULL`, and `NOT NULL` evaluates to `NULL` rather than `TRUE`, so the application is silently excluded. That drops exactly the population this metric exists to find: the agent claimed success and nothing ever confirmed it. Missing verification is therefore detected by `d.application_id is null` (a fact about the join) rather than by negating a nullable boolean. `nullif(count(*), 0)` returns `NULL` instead of raising when no attempts qualify, and deduplicating to one verdict per application keeps a retried submission from fanning out the denominator.
+
+**Test cases this query must handle**, verified against fixtures before publishing: verified success (excluded from both numerators); verified failure (counted once); no verification event at all (counted as missing, the case the naive query loses); agent never claimed completion (excluded from the denominator entirely); duplicate verification events where an early failure is superseded by a later success (latest verdict wins, counted once); a verification arriving after the window (counted as missing, by design); an attempt too recent for its window to have elapsed (excluded from the denominator); and an empty input (returns `NULL` rates rather than dividing by zero).
+
+### `constraint_evaluation_completed`
+Fires once per application when the constraint check runs. This event exists because **the absence of a violation is not evidence of qualification.** No violation event could equally mean every constraint passed, the check never ran, only some constraints were evaluated, the application came through an unsupported path, or the instrumentation itself failed. Those are very different states, and a metric that treats them alike will report its own blind spots as success.
+
+```
+constraint_evaluation_completed
+  application_id        string
+  evaluated_at          timestamp
+  evaluation_source     enum(recommendation_engine|prefill_check|submission_gate)
+  constraints_required  array<string>   // the user's saved hard constraints
+  constraints_checked   array<string>   // subset actually evaluated
+  constraints_passed    array<string>
+  constraints_unresolved array<string>  // could not be determined from the posting
+  coverage              float 0..1      // |checked| / |required|
+  result                enum(pass|fail|partial|not_evaluated)
+```
+
+`partial` and `not_evaluated` are first-class results, not error states. A posting that does not state its sponsorship policy leaves work authorization genuinely unresolved, and the honest record of that is `partial` with the field named in `constraints_unresolved`, not a silent pass.
 
 ### `constraint_violation_detected`
-Fires when a recommended or opened role conflicts with a saved hard constraint.
+Retained for diagnostics: it answers *which* constraint fails and *where* in the funnel, which is what the recommendation-quality analysis in the [audit method](./audit-method.md) needs. It is no longer used, in either direction, to establish qualification.
 
 ```
 constraint_violation_detected
@@ -104,19 +178,49 @@ constraint_violation_detected
   user_dismissed        bool
 ```
 
-Feeds the recommendation-quality funnel, which the [audit method](./audit-method.md) keeps deliberately separate from execution quality.
+### Critical-field provenance coverage
+
+Groundedness has the same absence problem. "No field was model-generated" is satisfied by an application where the fields were never resolved, never instrumented, or resolved to `none`. Coverage has to be measured positively:
+
+```
+critical_field_provenance_coverage
+  = |required critical fields with a resolution event AND a permitted provenance|
+  / |required critical fields|          -- from submission_attempted.required_critical_fields
+```
+
+Permitted provenance depends on the field's risk class. The rule follows the teardown's P0: identity facts are read, never generated.
+
+| Risk class | Permitted provenance | Prohibited | Extra requirement |
+|---|---|---|---|
+| `identity` | `profile`, `evidence`, `policy` (an explicit saved answer, never an inferred default), `user_asserted` | `model_generated`, `none`, or no event at all | none |
+| `compensation` | `profile`, `policy`, `user_asserted` | `model_generated`, `none`, or no event at all | `unit_validated = true` |
+| `logistics` | any resolved provenance | none | none |
+| `narrative` | any resolved provenance | none | material changes must be reviewed (see `resume_change_reviewed`) |
+
+`user_asserted` means the user explicitly supplied or confirmed the value. It is permitted, and it is **not** the same as `evidence`: the user authorized the claim, but nothing independent backs it. The schema keeps the two apart precisely so that "the user approved it" can never be reported as "the data supports it." That distinction is the same one the [prototype](../prototypes/jobright-trust-layer/README.md) had to fix in its own state model.
+
+`critical_field_resolved` therefore carries one more property for compensation fields:
+
+```
+  unit_validated        bool    // was the posting's pay unit parsed and matched
+                                // (annual vs monthly vs hourly)? null for other classes
+```
 
 ## Deriving TQA
 
-With the events above, the north star is a query rather than a philosophy. An application counts when all four hold:
+With the events above, the north star is a query rather than a philosophy. An application counts when all four hold, and **every condition is satisfied by the presence of positive evidence, never by the absence of a bad event.** A metric that can pass because instrumentation failed is not measuring the product; it is measuring its own coverage.
 
 | TQA condition | Derivation |
 |---|---|
-| Qualified | No `constraint_violation_detected` for the application |
-| Factually grounded | No `critical_field_resolved` with `provenance_type = model_generated` in class `identity` or `compensation` |
-| Submission verified | `submission_verified.verified = true` |
-| Interview-ready | No `resume_change_reviewed` with `user_action = auto_applied_no_review` where `is_material = true` |
+| **Qualified** | A `constraint_evaluation_completed` event exists **and** `coverage = 1.0` **and** `result = 'pass'` **and** `constraints_unresolved` is empty |
+| **Factually grounded** | Every field in `required_critical_fields` has a `critical_field_resolved` event whose `provenance_type` is permitted for its risk class, giving coverage `= 1.0`; every `compensation` field additionally has `unit_validated = true` |
+| **Submission verified** | A `submission_verified` event exists within the method's window with `verified = true`. Missing verification fails this condition; it does not pass by default |
+| **Interview-ready** | The count of `resume_change_reviewed` events with `is_material = true` and `user_action` in (`approved`, `edited`, `rejected`) equals `material_changes_count`. Counting the reviews rather than checking for the absence of `auto_applied_no_review` is deliberate: "no bad review event" is also satisfied by an application whose changes were never logged |
+
+Each of these can also fail for an uninteresting reason: the check never ran, the fields were never logged, the site could not be read. That is the point. An application whose qualification was never evaluated is not a Trusted Qualified Application, and the metric should say so out loud rather than let a gap in measurement read as a win.
 
 ## What I would ship first
 
-`critical_field_resolved` and the `submission_attempted` / `submission_verified` pair, in that order. Those three alone produce the baseline prevalence number that the [90-day plan](./teardown.md#9-if-i-were-their-pm-the-first-90-days) treats as its Day-30 decision gate, and the false-success rate that justifies execution honesty regardless of what the prevalence turns out to be.
+`critical_field_resolved` and the `submission_attempted` / `submission_verified` pair, in that order. Those three alone produce the baseline prevalence number that the [90-day plan](./teardown.md#9-if-i-were-their-pm-the-first-90-days) treats as its Day-30 decision gate, plus the verified-failure and missing-verification rates that justify execution honesty regardless of what the prevalence turns out to be.
+
+One caveat I would raise on day one rather than discover in month three: the missing-verification rate is partly a measure of our own integration coverage, so it will start high and fall as verification sources are added, for reasons that have nothing to do with product quality. Reporting it alongside the verified-failure rate, rather than blended into a single number, is what keeps that from looking like progress.
