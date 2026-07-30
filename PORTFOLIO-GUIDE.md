@@ -26,7 +26,8 @@ That's enough to know what I did and how I think.
 | Evidence discipline | [Logs](./jobright-ai/evidence-log.md), [indexes](./jobright-ai/evidence-index.md), [audit method](./jobright-ai/audit-method.md) distinguishing incidents from rates |
 | Prioritization under uncertainty | [Banded prioritization](./jobright-ai/teardown.md#6-recommendations-prioritized) with named assumptions and validation gates |
 | Experiment design | [Validation plan](./jobright-ai/validation-plan.md) with guardrails, stopping criteria, and a falsification condition |
-| Diagnosis to requirements | [Prototype](./prototypes/jobright-trust-layer/): policy, interaction logic, and edge cases in working form |
+| Diagnosis to requirements | [Prototype](./prototypes/jobright-trust-layer/): policy, interaction logic, and edge cases in working form, plus a [changelog](./prototypes/jobright-trust-layer/README.md) of two conceptual defects an external review exposed |
+| Working with engineering | [Instrumentation spec](./jobright-ai/instrumentation-spec.md): event schema, risk classes, and the SQL that measures the false-success rate |
 | Intellectual honesty | Steelman and self-falsification sections in both teardowns; epistemic labels; maturity labels |
 
 ## Strongest interview discussion topics
@@ -36,7 +37,7 @@ That's enough to know what I did and how I think.
 3. **Attribution before investment:** why the worst failures are policy failures (generate vs. read) rather than parsing failures, and what that changes about the roadmap.
 4. **The delegation-trust spectrum:** why user sentiment appears to invert with delegation depth, what moderates it (verification ability), and where the unclaimed market position is.
 5. **Prioritizing without internal data:** what bands preserve that fake-precise RICE destroys, and what I'd need to recalibrate.
-6. **Being wrong on purpose:** each teardown's falsification conditions, and what evidence would change my recommendations.
+6. **Being wrong on purpose:** the prototype shipped two states that contradicted my own teardown (approval treated as evidence; a self-verified submission). An external review caught them, I fixed the model and published the changelog. That is the story I would tell about how I handle being wrong.
 
 ## Limitations, stated plainly
 

@@ -37,7 +37,8 @@ Each competency maps to a specific, inspectable artifact, not a claim:
 | Evidence discipline | Dated [logs](./jobright-ai/evidence-log.md) and [indexes](./jobright-ai/evidence-index.md); observed vs. calculated vs. inferred kept distinct |
 | Prioritization & tradeoffs | [Banded prioritization](./jobright-ai/teardown.md#6-recommendations-prioritized) with stated assumptions; steelman sections in both teardowns |
 | From diagnosis to requirements | [Trust Layer prototype](./prototypes/jobright-trust-layer/): read-never-generated policy, resume diff, submission gate |
-| Experiment design | [Validation plan](./jobright-ai/validation-plan.md): research questions, methods, a staged experiment with falsification criteria |
+| Experiment design | [Validation plan](./jobright-ai/validation-plan.md) and [usability test plan](./prototypes/jobright-trust-layer/usability-test-plan.md): questions, methods, and what result would change the design |
+| Working with engineering | [Instrumentation spec](./jobright-ai/instrumentation-spec.md): the event schema that turns the north star into a query |
 | Intellectual honesty | "Where this analysis could be wrong" sections; evidence-maturity labels below |
 
 Not claimed here: stakeholder management, engineering leadership, or shipped business impact. This is independent research and concept work.

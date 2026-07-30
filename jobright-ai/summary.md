@@ -39,3 +39,4 @@ Prevalence is the biggest unknown: incidents are documented, rates are not. The 
 - [Evidence log](./evidence-log.md) · dated entries · [Evidence index](./evidence-index.md) · every finding with type, status, and confidence
 - [Trust Layer prototype](../prototypes/jobright-trust-layer/) · the P0 turned into interaction logic (independent concept)
 - [Validation plan](./validation-plan.md) · how this becomes decision-grade evidence
+- [Instrumentation spec](./instrumentation-spec.md) · the event schema that makes TQA a query, not a slogan
