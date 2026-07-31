@@ -154,3 +154,16 @@ a { color: var(--accent); }
   margin-top: 8px; font-size: 0.78rem; color: var(--muted); font-style: italic;
 }
 .tqa-verdict.pending { background: #eaf0fe; color: var(--accent); }
+
+/* Mobile: a 4-column table cannot fit 375px. Let it scroll inside its card
+   rather than forcing the whole page to scroll sideways. */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.facts { min-width: 460px; }
+@media (max-width: 600px) {
+  .layout { padding: 12px 12px; gap: 12px; }
+  .card { padding: 14px 14px; }
+  .topbar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 16px; }
+  .facts td, .facts th { padding: 7px 6px; }
+  .diff-actions { flex-wrap: wrap; }
+  .foot { padding: 14px 16px 24px; }
+}

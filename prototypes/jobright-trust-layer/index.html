@@ -28,12 +28,14 @@
     <div class="card">
       <h2>Critical facts <span class="hint">read, never generated</span></h2>
       <p class="explain">High-risk identity facts may only come from the canonical profile, a saved user policy, or explicit confirmation. When a value is missing, the agent stops and asks. It never guesses something plausible. Provenance is recorded per field, and confirming a value never relabels it as verified.</p>
+      <div class="table-scroll">
       <table class="facts" id="factsTable" aria-label="Critical facts with provenance">
         <thead>
           <tr><th>Field</th><th>Value</th><th>Provenance</th><th>Generation allowed?</th></tr>
         </thead>
         <tbody><!-- rendered by script.js --></tbody>
       </table>
+      </div>
       <div id="pauseBox" class="pause" hidden>
         <strong>⏸ Agent paused.</strong> <span id="pauseText"></span>
         <div class="pause-actions" id="pauseActions"></div>
