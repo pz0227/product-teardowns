@@ -1,11 +1,13 @@
 # Claude Code Teardown: When the Model Stops Being the Bottleneck
 
-> **Status:** 📖 Living analysis · v1 · **Evidence maturity: early pattern hypothesis** (4 documented incidents, one user, logging ongoing; four incidents are enough to form a hypothesis, not to prove a market pattern)
+> **Status:** 📖 Living analysis · v2 (2026-09-02) · **Evidence maturity: hypothesis now corroborated externally** (4 documented first-party incidents, one user, plus a public-issue census of 88,789 GitHub issues that independently supports the central thesis)
 > Written from a month of daily paid usage across three surfaces, with a [dated evidence log](./evidence-log.md) and an [evidence index](./evidence-index.md). Same rules as [teardown #1](../jobright-ai/teardown.md): feelings as signals, evidence as proof, roast the tradeoff, not the team. Claims are labeled: **Observed** = documented incident · **Inference** = argued from evidence, not proven · **External signal** = public source · **Hypothesis** = stated to be tested.
 
 ## TL;DR
 
 Claude Code is the deepest AI delegation I practice daily: an agent that edits my files, runs my commands, browses on my behalf, and drafts words that ship under my name. After a month of daily use, the surprising finding is that **none of my logged trust failures are about code quality.** The model writes good code. Every documented failure is about **memory, continuity, and transparency**: context that does not travel across surfaces, long sessions that silently drop agreed decisions, outages that surface as vague errors mid-task, and a pricing structure that quietly makes the user do the model routing.
+
+*(v2 update: I tested this thesis against 88,789 public GitHub issues. Zero of the twenty most-reacted are capability complaints, and the two most-commented threads in the entire repository are both about quota the user cannot see. See §5.5.)*
 
 The thesis: **frontier agents have moved the bottleneck.** The generation step is now the strongest link in the chain. The weakest links are the state systems around it, and those failures follow the exact pattern documented in teardown #1: value lands immediately, cost lands later, precisely where the product's own metrics cannot see it. The one fix I would ship first: a continuity contract, where the agent discloses what it still remembers and what it has lost, before it acts on a long session's context.
 
@@ -83,6 +85,74 @@ Four dated incidents, attributed across the pipeline:
 **Four for four, the model's intelligence is not the failing component.** This is the same attribution lesson as teardown #1, where the worst failures lived in value generation and state verification rather than parsing: fixing the obvious component (make the model smarter) would not have prevented a single logged incident. The binding constraint has moved to the state layer: what the agent remembers, what it discloses about what it remembers, and what happens to agreements at system boundaries (surfaces, sessions, compaction events).
 
 **The root cause behind the pattern, stated as a hypothesis:** the product's architecture treats context as an implementation detail to be managed invisibly (compact it, scope it per machine, let tiers vary), while the user experiences context as **the relationship itself.** Every place those two views collide produces a logged incident. This hypothesis is falsifiable: if future logging shows frequent trust failures that are pure generation errors, it weakens; if failures keep clustering at state boundaries, it strengthens.
+
+## 5.5 External signal: what 88,789 public issues say about where the bottleneck is
+
+*(External signal. Retrieved 2026-09-02 via the GitHub Search API against `anthropics/claude-code`. Public, reproducible, and not curated by me.)*
+
+Section 1 through 5 argue a thesis from four incidents in one person's usage: **the model is no longer the weak link; the state systems around it are.** That is a hypothesis with an obvious weakness, which is that one user's month is not a market. So I went and checked it against the largest public record of what this product's users actually complain about.
+
+The repository carries **88,789 issues**. Here are the twenty most-reacted, bucketed by what kind of promise is being broken.
+
+| Bucket | Reactions across top-20 issues | Representative issue |
+|---|---|---|
+| **Interop and platform reach** | ~10,300 | `Feature Request: Support AGENTS.md` (6,559 reactions) |
+| **Behavioral stability, not capability** | ~7,300 | `Claude Code is unusable for complex engineering tasks with the Feb updates` (3,286) |
+| **Identity and account plumbing** | ~3,200 | `Multi-account switching without shared email` (929) |
+| **Billing, quota, and pricing** | ~2,400 | `Instantly hitting usage limits with Max subscription` (724) |
+| **Terminal rendering** | ~1,700 | `Console scrolling top of history` (822, open since April 2025) |
+| **"The model cannot do the task"** | **0** | none in the top 20 |
+
+**The finding that matters: not one of the twenty most-reacted issues is a capability complaint.** Nobody in that set is saying the model writes bad code. The four model-related entries are all about *behavioral change* (a February update degrading long-horizon work, a deprecated model people want back, rhetorical tics, reflexive agreement), not about the ceiling of what it can do.
+
+That is the thesis of this teardown, stated by thousands of strangers instead of by me.
+
+**Reactions favor age; comments measure sustained pain.** An issue open since August 2025 has had twelve months to collect upvotes, so the interop bucket's lead is partly an artifact of time. Ranking by comment volume instead gives a different and sharper answer, and one cluster dominates outright:
+
+| Issue | Comments | Opened | State |
+|---|---|---|---|
+| Instantly hitting usage limits with Max subscription | **1,491** | 2026-01-03 | open |
+| Max plan session limits exhausted abnormally fast since March 23 | **843** | 2026-03-24 | open |
+| Phone verification | 742 | 2026-03-14 | open |
+| Unusable for complex engineering tasks with the Feb updates | 583 | 2026-04-02 | closed |
+
+Two billing threads carry 2,334 comments between them and both are still open eight months later. Nothing else in the repository is close.
+
+### Why the billing cluster is the same failure this teardown already describes
+
+It would be easy to file "usage limits" under pricing and move on. It is not a pricing problem. Look at what the two most instructive closed issues actually say:
+
+- **`Cache TTL silently regressed from 1h to 5m around early March 2026, causing quota and cost inflation`** (342 reactions).
+- **`HERMES.md in git commit messages causes requests to route to extra usage billing instead of plan quota`** (532 reactions).
+
+In both, an internal implementation detail changed what the user was charged, and the user had no instrument that could have shown it. Publicly reported alongside these, users [reverse-engineered the Claude Code binary](https://mlearning.substack.com/p/why-every-claude-code-power-user-is-secretly-broke) to find a caching bug inflating token consumption, and [The Register covered the dispute](https://www.theregister.com/2026/01/05/claude_devs_usage_limits/) over surprise limits.
+
+That is precisely the pattern this teardown and [teardown #1](../jobright-ai/teardown.md) both describe: **value lands immediately and visibly, cost lands later in a channel the user cannot audit.** The session felt productive. The quota is gone. The user cannot reconstruct which turn spent it, so the complaint arrives as a feeling of unfairness rather than as a bug report, which is exactly why one thread accumulates 1,491 comments instead of getting fixed and closed.
+
+The generalization across both teardowns:
+
+> An agent that consumes a metered resource on your behalf owes you a meter. Not a total after the fact, an itemized, per-action reading you can watch while it spends.
+
+Jobright spends the user's reputation and shows a count of applications. Claude Code spends the user's quota and shows a percentage. In both cases the unit displayed is not the unit that matters.
+
+### The identity cluster is a failure I have now seen in two different products
+
+Three separate issues asking for multi-account support total 2,338 reactions: [mobile](https://github.com/anthropics/claude-code/issues) (929), desktop (899), and per-connector accounts (510). Users have a work identity and a personal identity, and the product assumes one human equals one account.
+
+I hit the structurally identical defect in Jobright the same week, from the opposite direction. There, one email address is simultaneously the contact on my résumé, the key to the saved autofill profile, and the primary key on every employer-side account the agent creates for me. Three roles with wildly different reset costs, collapsed into one string I cannot rotate. *(Logged 2026-09-02, being written up for [teardown #1](../jobright-ai/teardown.md) once I have the artifacts to support it.)*
+
+Different products, same mistake. **Identity is plural, and products that model it as singular force an irreversible choice onto the user.** In Claude Code the cost is friction, logging out and back in. In an agent that writes accounts to third parties on your behalf, the same mistake is unrecoverable.
+
+I did not expect these two teardowns to converge here, and the convergence is the most useful thing I got out of writing both.
+
+### What this evidence does not establish
+
+- **Selection bias runs the whole way through.** People who file GitHub issues are a self-selected, technical, English-speaking minority of users. Silent satisfied users are invisible here, and so are non-technical users, who by section 1's segmentation are the fastest-growing group and the least able to verify the agent's work at all.
+- **Reaction counts are confounded by issue age**, stated above and only partly corrected by the comment ranking.
+- **Bucketing is mine.** Someone else could reasonably file the February-regression thread under capability rather than stability. I would argue the issue text is about a change in behavior, but it is a judgment call and it moves the headline number.
+- **Volume is not severity.** A rendering bug that annoys thousands may cost far less than a continuity failure that silently corrupts one person's work, which is the failure class my own evidence log actually contains.
+
+What the census does establish is narrower and still worth having: **the public record of this product's complaints is overwhelmingly about packaging, not intelligence.** That is the claim this teardown opened with, and I no longer have to rest it on four incidents.
 
 ## 6. The steelman: why a rational team ships it exactly this way
 

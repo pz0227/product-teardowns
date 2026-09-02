@@ -14,6 +14,7 @@ Every finding used in the [teardown](./teardown.md), with type, status, and conf
 | CC-05 | 07-30 | "The model is no longer the bottleneck": all four incidents attribute to state/continuity/transparency, none to generation quality | Inference from CC-01..04 | Medium (n=4; falsifiable as stated in teardown §5) | TL;DR, §5 | Hypothesis |
 | CC-06 | 07-30 | Sentiment patterns across the delegation spectrum (autocomplete loved, autonomous agents skeptically received) | External signal, directional | Low-Medium (public sentiment reads, no structured review analysis yet) | §8 | Hypothesis, flagged as weakest link in teardown §10.5 |
 | CC-07 | 07-30 | Product strategic direction (expansion beyond code toward general work) | Inference from public product surface area | Medium | §1, §8 | Hypothesis |
+| CC-08 | 09-02 | Public issue census, `anthropics/claude-code`, 88,789 issues: 0 of top-20 by reactions are capability complaints; the 2 most-commented threads (1,491 and 843 comments) are both quota-visibility | External signal, GitHub Search API | Reproducible query, public | Medium-High for the population it covers, **zero** for silent or non-technical users | §5.5, TL;DR |
 
 ## Reading notes
 

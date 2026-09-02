@@ -1,6 +1,8 @@
 # Claude Code in 3 Minutes
 
-> **Evidence maturity: early pattern hypothesis.** Four documented incidents from one month of daily paid usage, logging ongoing. Enough to form a hypothesis, not to prove a pattern. Published early on purpose, with the uncertainty on the label rather than buried in a footnote.
+> **Evidence maturity: hypothesis, now corroborated externally.** Four documented incidents from one month of daily paid usage, plus a public census of 88,789 GitHub issues that independently supports the central claim. Still one person's first-party evidence; the census covers only users who file issues. Uncertainty stays on the label.
+
+**The one number:** of the twenty most-reacted issues on `anthropics/claude-code`, **zero are capability complaints.** The two most-commented threads in the entire repository, 1,491 and 843 comments, are both about quota the user cannot see. That is this teardown's thesis, written by thousands of strangers.
 
 ## The product and the problem
 
