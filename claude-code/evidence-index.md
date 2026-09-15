@@ -15,6 +15,7 @@ Every finding used in the [teardown](./teardown.md), with type, status, and conf
 | CC-06 | 07-30 | Sentiment patterns across the delegation spectrum (autocomplete loved, autonomous agents skeptically received) | External signal, directional | Low-Medium (public sentiment reads, no structured review analysis yet) | §8 | Hypothesis, flagged as weakest link in teardown §10.5 |
 | CC-07 | 07-30 | Product strategic direction (expansion beyond code toward general work) | Inference from public product surface area | Medium | §1, §8 | Hypothesis |
 | CC-08 | 09-02 | Public issue census, `anthropics/claude-code`, 88,789 issues: 0 of top-20 by reactions are capability complaints; the 2 most-commented threads (1,491 and 843 comments) are both quota-visibility | External signal, GitHub Search API | Reproducible query, public | Medium-High for the population it covers, **zero** for silent or non-technical users | §5.5, TL;DR |
+| CC-09 | 09-15 | Same census re-run 13 days later: 91,795 issues, 3,214 new. Top new issue is an extensibility request, not a capability complaint. 10 issues / 162 reactions are one defect: `Read()` deny rules prompting on safe Bash compounds, including inside `bypassPermissions` and Auto mode | External signal, GitHub Search API | Reproducible query, public | Medium for the defect, **low** for durability: likely one regression band (2.1.257-2.1.259), several already closed | §5.6 |
 
 ## Reading notes
 

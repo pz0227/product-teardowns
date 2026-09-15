@@ -1,6 +1,6 @@
 # Claude Code Teardown: When the Model Stops Being the Bottleneck
 
-> **Status:** 📖 Living analysis · v2 (2026-09-02) · **Evidence maturity: hypothesis now corroborated externally** (4 documented first-party incidents, one user, plus a public-issue census of 88,789 GitHub issues that independently supports the central thesis)
+> **Status:** 📖 Living analysis · v2.1 (2026-09-15) · **Evidence maturity: hypothesis corroborated externally, now tracked over time** (4 documented first-party incidents, one user, plus a public-issue census re-run 13 days apart: 88,789 issues on 09-02, 91,795 on 09-15)
 > Written from a month of daily paid usage across three surfaces, with a [dated evidence log](./evidence-log.md) and an [evidence index](./evidence-index.md). Same rules as [teardown #1](../jobright-ai/teardown.md): feelings as signals, evidence as proof, roast the tradeoff, not the team. Claims are labeled: **Observed** = documented incident · **Inference** = argued from evidence, not proven · **External signal** = public source · **Hypothesis** = stated to be tested.
 
 ## TL;DR
@@ -8,6 +8,8 @@
 Claude Code is the deepest AI delegation I practice daily: an agent that edits my files, runs my commands, browses on my behalf, and drafts words that ship under my name. After a month of daily use, the surprising finding is that **none of my logged trust failures are about code quality.** The model writes good code. Every documented failure is about **memory, continuity, and transparency**: context that does not travel across surfaces, long sessions that silently drop agreed decisions, outages that surface as vague errors mid-task, and a pricing structure that quietly makes the user do the model routing.
 
 *(v2 update: I tested this thesis against 88,789 public GitHub issues. Zero of the twenty most-reacted are capability complaints, and the two most-commented threads in the entire repository are both about quota the user cannot see. See §5.5.)*
+
+*(v2.1 update: I re-ran the same query 13 days later. 3,214 new issues, and the largest new cluster is the permission system refusing safe actions, including in the mode users enable to stop being asked. That is a guardrail failing in the direction almost nobody measures. See §5.6.)*
 
 The thesis: **frontier agents have moved the bottleneck.** The generation step is now the strongest link in the chain. The weakest links are the state systems around it, and those failures follow the exact pattern documented in teardown #1: value lands immediately, cost lands later, precisely where the product's own metrics cannot see it. The one fix I would ship first: a continuity contract, where the agent discloses what it still remembers and what it has lost, before it acts on a long session's context.
 
@@ -153,6 +155,57 @@ I did not expect these two teardowns to converge here, and the convergence is th
 - **Volume is not severity.** A rendering bug that annoys thousands may cost far less than a continuity failure that silently corrupts one person's work, which is the failure class my own evidence log actually contains.
 
 What the census does establish is narrower and still worth having: **the public record of this product's complaints is overwhelmingly about packaging, not intelligence.** That is the claim this teardown opened with, and I no longer have to rest it on four incidents.
+
+## 5.6 The 13-day re-run: the guardrail is now failing on false positives
+
+> **External signal**, re-run of the §5.5 query on 2026-09-15. Same repository, same method, 13 days later.
+
+**What changed at the top line.** The repository went from 88,789 issues to **91,795**, with **3,214 created since 2026-09-02**, about 230 a day. The two billing threads from §5.5 are both still open and still the most-discussed in the repository (725 reactions / 1,494 comments, and 545 / 853). Nothing about the quota-visibility finding has been resolved; it has just kept accumulating.
+
+**The most-reacted new issue is still not a capability complaint.** It is [*"Mods, make Claude 10x more extensible"*](https://github.com/anthropics/claude-code/issues) (175 reactions, 181 comments, opened 09-03). Users are not asking the model to be smarter. They are asking for more control over the harness around it. That is the v1 thesis stated by the users themselves.
+
+### The new cluster: deny rules firing on safe commands
+
+Searching the repository for permission and deny-rule issues opened since 2026-08-15 returns **308 matches**. Inside the top twenty by reactions, ten are the same defect wearing different hats, nearly all filed on 09-02 and 09-03, nearly all still open, and all pointing at versions 2.1.257 through 2.1.259:
+
+| Reactions | Issue |
+| --- | --- |
+| 58 | Bash cd-compound-read guard prompts on absolute `cd` targets whenever a `Read()` deny rule exists |
+| 26 | **`bypassPermissions` mode now prompts** on `cd DIR && grep …` when a `Read()` deny rule is configured |
+| 18 | `Read()` deny rules prompt on `cd` compounds even when the target is a literal path |
+| 13 | **Auto mode still prompts** for grep authorization despite being in Auto mode *(closed)* |
+| 12 | `Read()` deny rules force manual approval on unrelated `grep` commands after `cd` with a relative glob |
+| 10 | `Read(**/.env)` deny rule prompts on every `rg` directory search, though `rg` skips hidden files by default |
+| 8 | `grep -r` with `--include` filters falsely triggers a `Read(.env)` deny prompt |
+| 7 | `Read()` deny rule arms an unwhitelistable `cd`+relative-read prompt in `bypassPermissions` |
+| 6 | Read-only Bash compounds starting with `cd DIR` lost static auto-approval in 2.1.258 |
+| 4 | `rg` reading stdin in a pipeline is treated as a search of `.` and prompts |
+
+**162 reactions across ten issues, and every single one is the permission system stopping something it should have allowed.**
+
+### Why this matters more than it looks
+
+A permission system has two failure modes, and they are not symmetric in how much attention they get:
+
+- **False negative:** it allows an action it should have stopped. This is what safety reviews are built to catch.
+- **False positive:** it stops an action it should have allowed. This is what determines whether the system is still switched on a month later.
+
+Almost every conversation about agent guardrails is about the first one. **The second is the one that actually decides the outcome**, because a guardrail that fires on `cd src && grep -r TODO` teaches the user to reach for `bypassPermissions`. And the sharpest issue in the cluster is that **`bypassPermissions` prompts too**. So the escape hatch also failed. That is the worst available state: the user has already disabled their own protection, and is *still* being interrupted.
+
+Two of the adjacent issues make the same point from the mode side rather than the rule side: Auto mode's bash-first instruction pushes `sed` and heredoc edits instead of the Edit and Write tools (38 reactions), and silently disables nested `CLAUDE.md` and path-scoped rules (16). A mode the user turned on for convenience is quietly changing which rules apply.
+
+### The metric I would ship for this
+
+The permission system currently reports nothing about its own accuracy. I would publish two numbers, per rule:
+
+1. **Prompt acceptance rate.** Of the prompts this rule generated, what share did the user approve? **If a rule is approved 99% of the time, it is not asking a question. It is adding a keystroke,** and it should be auto-approved or rewritten.
+2. **Bypass rate.** What share of sessions with this rule configured are run in `bypassPermissions` or Auto mode? A rule with a high bypass rate is not protecting anyone; it is the reason protection got turned off.
+
+A guardrail without a false-positive rate is not a measured system, it is a hope. I hit exactly this building the eval for Kapi, my own analytics agent, which is why that eval scores **false refusals as their own dimension**, separate from missed refusals, and why the deterministic routing layer was tested for **false fires** and not only for correct ones. Precision and recall are both real. A safety system that only measures one of them gets disabled by its own users.
+
+### What this re-run does not establish
+
+Thirteen days is a short window, and a cluster of near-identical issues filed on two consecutive days is more likely to be one regression than a standing property of the product. Several are already closed. The honest reading is that this is a **regression in one version band**, not a permanent design failure. What makes it worth writing down is not the bug. It is that the product had no published measure that would have caught it, and the users had to catch it for them, ten times over.
 
 ## 6. The steelman: why a rational team ships it exactly this way
 

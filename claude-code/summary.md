@@ -1,8 +1,10 @@
 # Claude Code in 3 Minutes
 
-> **Evidence maturity: hypothesis, now corroborated externally.** Four documented incidents from one month of daily paid usage, plus a public census of 88,789 GitHub issues that independently supports the central claim. Still one person's first-party evidence; the census covers only users who file issues. Uncertainty stays on the label.
+> **Evidence maturity: hypothesis corroborated externally, now tracked over time.** Four documented incidents from one month of daily paid usage, plus a public issue census run twice, 13 days apart: 88,789 issues on 2026-09-02 and 91,795 on 2026-09-15. Still one person's first-party evidence; the census covers only users who file issues. Uncertainty stays on the label.
 
 **The one number:** of the twenty most-reacted issues on `anthropics/claude-code`, **zero are capability complaints.** The two most-commented threads in the entire repository, 1,491 and 843 comments, are both about quota the user cannot see. That is this teardown's thesis, written by thousands of strangers.
+
+**The newest finding (09-15):** the largest new cluster is the permission system refusing safe commands, ten issues saying the same thing, including inside `bypassPermissions`, the mode users turn on to stop being asked. A guardrail has two failure modes and almost everyone only measures one.
 
 ## The product and the problem
 

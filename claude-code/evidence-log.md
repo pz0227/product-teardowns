@@ -6,6 +6,18 @@ Context for all entries: the author uses Claude Code daily as a paying subscribe
 
 ---
 
+## 2026-09-15, CC-09: census re-run, 13 days after CC-08
+
+Re-ran the CC-08 queries against `anthropics/claude-code` with the GitHub Search API.
+
+- Total issues **91,795**, up from 88,789 on 09-02. **3,214 created since 2026-09-02**, roughly 230 a day.
+- The two quota threads from CC-08 are both still open and still the most-discussed in the repository: 725 reactions / 1,494 comments, and 545 / 853. Nothing resolved, just accumulated.
+- Most-reacted issue opened in the window: "Mods, make Claude 10x more extensible" (175 reactions, 181 comments, open). Not a capability complaint. A request for more control over the harness.
+- Query for permission and deny-rule issues created since 2026-08-15: **308 matches**. Within the top 20 by reactions, **10 issues totalling 162 reactions are the same defect**: `Read()` deny rules prompting on safe Bash compounds (`cd DIR && grep`, `rg`, `grep -r --include`), including inside `bypassPermissions` (26 and 7 reactions) and Auto mode (13, closed). Version band cited across them: 2.1.257 to 2.1.259.
+- Adjacent, same theme from the mode side: Auto mode's bash-first instruction pushing `sed`/heredoc over Edit/Write (38), and silently disabling nested `CLAUDE.md` and path-scoped rules (16).
+
+**Limitation, stated up front:** ten near-identical issues filed on 09-02 and 09-03 read as one regression, not a standing design property, and several are closed already. Logged because of what it says about measurement, not about the bug. Written up in teardown §5.6.
+
 ## 2026-09-02, External evidence census: 88,789 public GitHub issues (CC-08)
 
 **Method.** GitHub Search API against `anthropics/claude-code`, two passes: top 40 issues by reaction count, top 35 by comment count, plus open issues created since 2026-06-01. Public, reproducible by anyone with the same query.
