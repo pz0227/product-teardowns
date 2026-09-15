@@ -162,7 +162,7 @@ What the census does establish is narrower and still worth having: **the public 
 
 **What changed at the top line.** The repository went from 88,789 issues to **91,795**, with **3,214 created since 2026-09-02**, about 230 a day. The two billing threads from §5.5 are both still open and still the most-discussed in the repository (725 reactions / 1,494 comments, and 545 / 853). Nothing about the quota-visibility finding has been resolved; it has just kept accumulating.
 
-**The most-reacted new issue is still not a capability complaint.** It is [*"Mods, make Claude 10x more extensible"*](https://github.com/anthropics/claude-code/issues) (175 reactions, 181 comments, opened 09-03). Users are not asking the model to be smarter. They are asking for more control over the harness around it. That is the v1 thesis stated by the users themselves.
+**The most-reacted new issue is still not a capability complaint.** It is [*"Mods, make Claude 10x more extensible"*](https://github.com/anthropics/claude-code/issues/91870) (175 reactions, 181 comments, opened 09-03). Users are not asking the model to be smarter. They are asking for more control over the harness around it. That is the v1 thesis stated by the users themselves.
 
 ### The new cluster: deny rules firing on safe commands
 
